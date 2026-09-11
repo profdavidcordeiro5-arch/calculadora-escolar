@@ -1,0 +1,280 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#14202B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mercado escolar">
+<meta name="description" content="Market share, ocupação, evasão e ticket médio para escolas privadas de Pernambuco.">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIkNhbGN1bGFkb3JhIGRlIG1lcmNhZG8gZXNjb2xhciIsICJzaG9ydF9uYW1lIjogIk1lcmNhZG8gZXNjb2xhciIsICJkZXNjcmlwdGlvbiI6ICJNYXJrZXQgc2hhcmUsIG9jdXBhw6fDo28sIGV2YXPDo28gZSB0aWNrZXQgbcOpZGlvIHBhcmEgZXNjb2xhcyBwcml2YWRhcyBkZSBQZXJuYW1idWNvIiwgInN0YXJ0X3VybCI6ICIuLyIsICJzY29wZSI6ICIuLyIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAib3JpZW50YXRpb24iOiAicG9ydHJhaXQtcHJpbWFyeSIsICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGQkZBRjciLCAidGhlbWVfY29sb3IiOiAiIzE0MjAyQiIsICJsYW5nIjogInB0LUJSIiwgImljb25zIjogW3sic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIWnBaWGRDYjNnOUlqQWdNQ0ExTVRJZ05URXlJajRLUEhKbFkzUWdkMmxrZEdnOUlqVXhNaUlnYUdWcFoyaDBQU0kxTVRJaUlISjRQU0l4TVRJaUlHWnBiR3c5SWlNeE5ESXdNa0lpTHo0S1BISmxZM1FnZUQwaU1URTRJaUI1UFNJeU9EWWlJSGRwWkhSb1BTSTFPQ0lnYUdWcFoyaDBQU0l4TWpJaUlISjRQU0l4TUNJZ1ptbHNiRDBpSTBNNE9USXlRU0l2UGdvOGNtVmpkQ0I0UFNJeE9UZ2lJSGs5SWpJeU9DSWdkMmxrZEdnOUlqVTRJaUJvWldsbmFIUTlJakU0TUNJZ2NuZzlJakV3SWlCbWFXeHNQU0lqUmpSR01VVkJJaTgrQ2p4eVpXTjBJSGc5SWpJM09DSWdlVDBpTVRjd0lpQjNhV1IwYUQwaU5UZ2lJR2hsYVdkb2REMGlNak00SWlCeWVEMGlNVEFpSUdacGJHdzlJaU5HTkVZeFJVRWlMejRLUEhKbFkzUWdlRDBpTXpVNElpQjVQU0l4TVRJaUlIZHBaSFJvUFNJMU9DSWdhR1ZwWjJoMFBTSXlPVFlpSUhKNFBTSXhNQ0lnWm1sc2JEMGlJekpGTjBRMU1pSXZQZ284WTJseVkyeGxJR040UFNJeE5EY2lJR041UFNJeE5UQWlJSEk5SWpNMElpQm1hV3hzUFNJalJqUkdNVVZCSWk4K0Nqd3ZjM1puUGc9PSIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSJ9XX0=">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9IiMxNDIwMkIiLz4KPHJlY3QgeD0iMTE4IiB5PSIyODYiIHdpZHRoPSI1OCIgaGVpZ2h0PSIxMjIiIHJ4PSIxMCIgZmlsbD0iI0M4OTIyQSIvPgo8cmVjdCB4PSIxOTgiIHk9IjIyOCIgd2lkdGg9IjU4IiBoZWlnaHQ9IjE4MCIgcng9IjEwIiBmaWxsPSIjRjRGMUVBIi8+CjxyZWN0IHg9IjI3OCIgeT0iMTcwIiB3aWR0aD0iNTgiIGhlaWdodD0iMjM4IiByeD0iMTAiIGZpbGw9IiNGNEYxRUEiLz4KPHJlY3QgeD0iMzU4IiB5PSIxMTIiIHdpZHRoPSI1OCIgaGVpZ2h0PSIyOTYiIHJ4PSIxMCIgZmlsbD0iIzJFN0Q1MiIvPgo8Y2lyY2xlIGN4PSIxNDciIGN5PSIxNTAiIHI9IjM0IiBmaWxsPSIjRjRGMUVBIi8+Cjwvc3ZnPg==">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9IiMxNDIwMkIiLz4KPHJlY3QgeD0iMTE4IiB5PSIyODYiIHdpZHRoPSI1OCIgaGVpZ2h0PSIxMjIiIHJ4PSIxMCIgZmlsbD0iI0M4OTIyQSIvPgo8cmVjdCB4PSIxOTgiIHk9IjIyOCIgd2lkdGg9IjU4IiBoZWlnaHQ9IjE4MCIgcng9IjEwIiBmaWxsPSIjRjRGMUVBIi8+CjxyZWN0IHg9IjI3OCIgeT0iMTcwIiB3aWR0aD0iNTgiIGhlaWdodD0iMjM4IiByeD0iMTAiIGZpbGw9IiNGNEYxRUEiLz4KPHJlY3QgeD0iMzU4IiB5PSIxMTIiIHdpZHRoPSI1OCIgaGVpZ2h0PSIyOTYiIHJ4PSIxMCIgZmlsbD0iIzJFN0Q1MiIvPgo8Y2lyY2xlIGN4PSIxNDciIGN5PSIxNTAiIHI9IjM0IiBmaWxsPSIjRjRGMUVBIi8+Cjwvc3ZnPg==">
+<title>Calculadora de mercado · escolas de Pernambuco</title>
+<style>
+:root{--ink:#14202B;--ink2:#25384A;--pap:#FBFAF7;--lin:#E3E0D8;--tx:#1F2A33;--tx2:#5E6A73;
+ --tx3:#95A0A8;--az:#1F5C8B;--vd:#2E7D52;--vm:#B33A2B;--ou:#C8922A;
+ --s:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+ --c:"Inter","Segoe UI",system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--c);background:var(--pap);color:var(--tx);line-height:1.5;
+ -webkit-font-smoothing:antialiased}
+.env{max-width:980px;margin:0 auto;padding:34px 22px 70px}
+header{border-bottom:3px solid var(--ink);padding-bottom:20px;margin-bottom:6px}
+h1{font-family:var(--s);font-size:clamp(30px,5vw,46px);line-height:1.04;color:var(--ink);
+ font-weight:600;letter-spacing:-.01em}
+header p{margin-top:10px;color:var(--tx2);font-size:16px;max-width:62ch}
+nav{display:flex;gap:2px;margin:26px 0 0;border-bottom:1px solid var(--lin);flex-wrap:wrap}
+nav button{border:0;background:none;padding:13px 17px;font:600 14.5px var(--c);color:var(--tx2);
+ cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+nav button:hover{color:var(--ink)}
+nav button.on{color:var(--ink);border-bottom-color:var(--ou)}
+section{display:none;padding-top:28px}
+section.on{display:block}
+.ft{font-family:var(--s);font-size:26px;color:var(--ink);margin-bottom:4px}
+.fd{color:var(--tx2);font-size:15px;max-width:64ch;margin-bottom:20px}
+.fm{background:var(--ink);color:#fff;border-radius:10px;padding:15px 20px;margin-bottom:24px;
+ font-family:var(--s);font-size:19px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fm span{color:#A8BFD1;font-family:var(--c);font-size:13.5px}
+.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:15px}
+label{display:block;font:600 12.5px var(--c);color:var(--tx2);margin-bottom:6px;letter-spacing:.02em}
+input,select{width:100%;border:1px solid var(--lin);background:#fff;border-radius:8px;
+ padding:11px 13px;font:500 17px var(--c);color:var(--ink)}
+input:focus,select:focus{outline:0;border-color:var(--az);box-shadow:0 0 0 3px rgba(31,92,139,.11)}
+.res{margin-top:26px;border:1px solid var(--lin);border-radius:12px;overflow:hidden;background:#fff}
+.res h3{font:600 13px var(--c);color:var(--tx2);padding:13px 20px;border-bottom:1px solid var(--lin);
+ background:#F7F5F1}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px 20px;text-align:right;font-variant-numeric:tabular-nums;font-size:16px;
+ border-bottom:1px solid #F0EEE9}
+th{font:600 11.5px var(--c);color:var(--tx3);letter-spacing:.04em}
+th:first-child,td:first-child{text-align:left}
+tr:last-child td{border-bottom:0}
+tr.t td{font-weight:700;background:#F7F5F1;border-top:1px solid var(--lin)}
+td b{font-size:19px;color:var(--ink)}
+td.sh{font-weight:700;color:var(--az)}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:15px;margin-top:24px}
+.bx{border:1px solid var(--lin);border-radius:12px;padding:19px 21px;background:#fff}
+.bx b{display:block;font-family:var(--s);font-size:40px;line-height:1;color:var(--ink)}
+.bx.vd b{color:var(--vd)} .bx.vm b{color:var(--vm)} .bx.az b{color:var(--az)}
+.bx span{display:block;font-size:13px;color:var(--tx2);margin-top:8px}
+.nota{margin-top:18px;font-size:13.5px;color:var(--tx2);line-height:1.6;border-left:3px solid var(--lin);
+ padding-left:15px}
+.nota b{color:var(--ink)}
+.av{background:#FFF9EC;border:1px solid #EEDFAE;border-radius:9px;padding:12px 16px;margin-top:16px;
+ font-size:13.5px;color:#7A5B12}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--lin);font-size:13px;color:var(--tx2)}
+@media(max-width:640px){.env{padding:22px 15px 50px}.fm{font-size:16px}}
+
+.inst{position:fixed;left:14px;right:14px;bottom:14px;background:var(--ink);color:#fff;border-radius:13px;
+ padding:14px 17px;display:none;align-items:center;gap:12px;flex-wrap:wrap;z-index:9;
+ box-shadow:0 10px 34px rgba(20,32,43,.3)}
+.inst.on{display:flex}
+.inst span{flex:1;font-size:14.5px}
+.inst button{border:0;border-radius:9px;padding:9px 16px;font:600 14px var(--c);cursor:pointer;
+ background:var(--ou);color:var(--ink)}
+.inst button.x{background:transparent;color:#A8BFD1;padding:9px 6px}
+@media(display-mode:standalone){header{padding-top:6px}}
+@media(max-width:640px){
+  nav{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  nav button{padding:12px 14px;font-size:14px;white-space:nowrap}
+  .grade{grid-template-columns:1fr 1fr}
+  .big{grid-template-columns:1fr 1fr}
+  th,td{padding:10px 12px;font-size:14.5px}
+  th{font-size:10.5px}
+  td b{font-size:17px}
+  .fm{font-size:16px;padding:13px 15px}
+  .bx b{font-size:32px}
+  body{padding-bottom:80px}
+}
+@media(max-width:420px){.grade{grid-template-columns:1fr}}
+</style></head><body><div class="env">
+<header>
+  <h1>Quanto do seu mercado<br>você tem hoje</h1>
+  <p>Quatro cálculos que toda escola deveria acompanhar. Os números de mercado vêm do Censo Escolar 2025
+  do INEP e já estão carregados: rede privada particular de Pernambuco, 1.930 escolas.</p>
+</header>
+<nav>
+  <button class="on" data-t="ms">Market share</button>
+  <button data-t="oc">Ocupação</button>
+  <button data-t="ch">Evasão</button>
+  <button data-t="tk">Ticket médio</button>
+</nav>
+
+<section class="on" id="ms">
+  <div class="ft">Market share por etapa</div>
+  <p class="fd">Informe onde a escola fica e quantos alunos ela tem em cada etapa.
+  O cálculo compara com todas as escolas particulares do município e do bairro.</p>
+  <div class="fm">share = alunos da escola ÷ alunos da rede particular × 100
+    <span>por etapa e no total</span></div>
+  <div class="grade">
+    <div><label>Município</label><select id="mun"></select></div>
+    <div><label>Bairro (opcional)</label><select id="bai"><option value="">Município inteiro</option></select></div>
+  </div>
+  <div class="grade" style="margin-top:15px">
+    <div><label>Educação infantil</label><input type="number" inputmode="numeric" min="0" id="q0" placeholder="0"></div>
+    <div><label>Anos iniciais · 1º ao 5º</label><input type="number" inputmode="numeric" min="0" id="q1" placeholder="0"></div>
+    <div><label>Anos finais · 6º ao 9º</label><input type="number" inputmode="numeric" min="0" id="q2" placeholder="0"></div>
+    <div><label>Ensino médio</label><input type="number" inputmode="numeric" min="0" id="q3" placeholder="0"></div>
+  </div>
+  <div class="res"><h3 id="msh">Resultado</h3><table id="mst"></table></div>
+  <div class="nota"><b>Como ler.</b> O share do município mostra a posição na cidade inteira.
+  O share do bairro mostra a disputa imediata, onde a captação realmente acontece.
+  Uma escola pode ter 2% da cidade e 25% do próprio bairro.</div>
+</section>
+
+<section id="oc">
+  <div class="ft">Taxa de ocupação</div>
+  <p class="fd">Quanto da capacidade instalada está sendo usada. Vaga ociosa é custo fixo sem receita.</p>
+  <div class="fm">ocupação = matriculados ÷ capacidade total × 100</div>
+  <div class="grade">
+    <div><label>Alunos matriculados</label><input type="number" inputmode="numeric" min="0" id="o1" placeholder="0"></div>
+    <div><label>Capacidade total de vagas</label><input type="number" inputmode="numeric" min="0" id="o2" placeholder="0"></div>
+  </div>
+  <div class="big" id="ocr"></div>
+  <div class="nota"><b>Referência.</b> Abaixo de 70% costuma indicar estrutura ociosa.
+  Acima de 95%, a escola pode estar recusando matrícula por falta de espaço.</div>
+</section>
+
+<section id="ch">
+  <div class="ft">Taxa de evasão</div>
+  <p class="fd">Quantos alunos a escola perdeu no período. Aluno que sai já custou captação.</p>
+  <div class="fm">evasão = alunos que saíram ÷ alunos no início × 100</div>
+  <div class="grade">
+    <div><label>Alunos no início do período</label><input type="number" inputmode="numeric" min="0" id="c1" placeholder="0"></div>
+    <div><label>Alunos que saíram</label><input type="number" inputmode="numeric" min="0" id="c2" placeholder="0"></div>
+  </div>
+  <div class="big" id="chr"></div>
+  <div class="nota"><b>Atenção.</b> Não confunda evasão com a saída natural de quem concluiu a
+  última série oferecida. Conte apenas quem poderia ter continuado e não continuou.</div>
+</section>
+
+<section id="tk">
+  <div class="ft">Ticket médio</div>
+  <p class="fd">Quanto cada aluno representa de receita por mês, já considerando bolsas e inadimplência
+  se você usar a receita efetivamente recebida.</p>
+  <div class="fm">ticket = receita do mês ÷ alunos do mês</div>
+  <div class="grade">
+    <div><label>Receita do mês (R$)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="t1" placeholder="0,00"></div>
+    <div><label>Alunos no mês</label><input type="number" inputmode="numeric" min="0" id="t2" placeholder="0"></div>
+  </div>
+  <div class="big" id="tkr"></div>
+  <div class="nota"><b>Dois tickets.</b> Usando a receita faturada você obtém o ticket nominal.
+  Usando a receita recebida, o ticket real. A diferença entre os dois é o custo da inadimplência.</div>
+</section>
+
+
+
+<footer>Dados de mercado: Censo Escolar 2025, INEP · rede privada particular de Pernambuco ·
+excluídas escolas conveniadas, do Sistema S, sindicais e de ONG, e a educação profissional.
+Os cálculos acontecem no seu navegador; nada é enviado para lugar nenhum.</footer>
+
+<div id="inst" class="inst"><span>Instale para usar sem navegador</span>
+  <button id="instB">Instalar</button><button id="instX" class="x">agora não</button></div>
+<script>
+/* funciona offline por si só; quando servido por http, guarda em cache */
+if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
+  var sw='self.addEventListener("install",function(e){self.skipWaiting()});'+
+         'self.addEventListener("activate",function(e){e.waitUntil(self.clients.claim())});'+
+         'self.addEventListener("fetch",function(e){e.respondWith(caches.open("mercado-v1").then(function(c){'+
+         'return c.match(e.request).then(function(r){return r||fetch(e.request).then(function(n){'+
+         'if(e.request.method==="GET")c.put(e.request,n.clone());return n})})}))});';
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:"text/javascript"}))).catch(function(){});
+}
+var adiar=null;
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault(); adiar=e;
+  if(localStorage.getItem("instOff"))return;
+  document.getElementById("inst").classList.add("on");
+});
+document.getElementById("instB").onclick=function(){
+  document.getElementById("inst").classList.remove("on");
+  if(adiar){adiar.prompt();adiar=null}
+};
+document.getElementById("instX").onclick=function(){
+  document.getElementById("inst").classList.remove("on");
+  try{localStorage.setItem("instOff","1")}catch(e){}
+};
+</script>
+</div>
+<script>
+var D={"m":[["Abreu e Lima",1359,2403,1438,389,23],["Afogados da Ingazeira",154,275,254,98,4],["Afrânio",44,74,35,0,1],["Agrestina",274,437,201,0,6],["Alagoinha",57,88,0,0,1],["Aliança",519,808,473,0,9],["Altinho",299,452,292,0,4],["Amaraji",269,463,318,0,4],["Araripina",535,989,562,148,12],["Araçoiaba",111,298,121,0,4],["Arcoverde",1118,1404,927,344,11],["Barra de Guabiraba",35,71,0,0,1],["Barreiros",618,1093,662,170,9],["Belo Jardim",1209,1468,810,329,14],["Belém de Maria",21,42,0,0,1],["Belém do São Francisco",37,43,0,0,1],["Bezerros",906,1263,394,154,14],["Bodocó",136,219,99,0,3],["Bom Conselho",282,511,307,0,4],["Bom Jardim",146,236,163,0,2],["Bonito",365,686,408,0,5],["Brejo da Madre de Deus",647,988,549,16,8],["Brejão",46,16,0,0,1],["Buenos Aires",78,57,0,0,1],["Buíque",117,227,176,0,3],["Cabo de Santo Agostinho",1562,4711,2502,490,37],["Cabrobó",133,329,201,0,3],["Cachoeirinha",197,380,204,0,2],["Caetés",101,222,149,0,2],["Camaragibe",1838,4787,2342,436,42],["Camocim de São Félix",305,532,170,0,5],["Camutanga",245,362,0,0,3],["Canhotinho",25,38,0,0,1],["Carpina",1683,2281,940,324,34],["Caruaru",4766,9178,5334,2219,81],["Catende",423,798,507,0,7],["Cedro",114,226,140,0,2],["Chã Grande",145,274,166,58,3],["Chã de Alegria",143,191,0,0,2],["Condado",303,543,328,24,4],["Correntes",51,140,0,0,1],["Cortês",72,193,103,0,1],["Cumaru",73,127,59,0,3],["Cupira",139,228,114,0,7],["Custódia",234,417,205,21,4],["Dormentes",49,77,0,0,1],["Escada",847,1760,940,55,21],["Exu",135,160,14,0,2],["Feira Nova",292,202,0,0,3],["Ferreiros",102,164,22,0,3],["Flores",16,50,10,0,1],["Floresta",278,376,244,0,4],["Frei Miguelinho",57,77,49,0,1],["Gameleira",216,347,203,0,2],["Garanhuns",2157,3728,2182,917,40],["Glória do Goitá",311,700,267,35,4],["Goiana",989,1824,1228,237,21],["Gravatá",942,2557,1074,231,28],["Iati",90,172,76,0,2],["Ibimirim",54,146,72,0,1],["Igarassu",1302,2590,1353,341,25],["Ilha de Itamaracá",155,173,17,0,4],["Ipojuca",675,1188,690,233,10],["Ipubi",75,159,112,0,2],["Itambé",440,783,511,0,7],["Itapetim",51,91,102,0,2],["Itapissuma",286,376,193,50,6],["Itaquitinga",191,313,109,0,4],["Itaíba",167,174,145,0,2],["Jaboatão dos Guararapes",8725,18854,9794,2847,174],["Jataúba",134,260,196,0,2],["Jatobá",21,48,53,0,1],["Joaquim Nabuco",72,77,52,0,2],["João Alfredo",350,511,330,0,4],["Jucati",31,38,21,0,1],["Jupi",152,178,65,0,2],["Jurema",49,95,0,0,1],["Lagoa Grande",104,313,167,0,4],["Lagoa de Itaenga",530,661,448,0,6],["Lagoa do Carro",120,190,96,0,2],["Lagoa do Ouro",93,184,0,0,2],["Lagoa dos Gatos",64,77,79,0,1],["Lajedo",398,806,601,236,6],["Limoeiro",565,914,476,119,12],["Macaparana",292,282,174,0,5],["Machados",60,111,50,0,2],["Mirandiba",9,22,0,0,1],["Moreilândia",9,98,0,0,1],["Moreno",737,1383,323,35,15],["Nazaré da Mata",565,842,590,105,8],["Olinda",5338,11482,6063,2004,132],["Orobó",153,274,188,0,3],["Orocó",47,139,64,0,2],["Ouricuri",519,986,400,7,5],["Palmares",742,1506,1067,393,12],["Palmeirina",33,61,5,0,1],["Panelas",118,167,120,0,1],["Passira",241,278,23,0,3],["Paudalho",579,886,349,18,13],["Paulista",5225,10881,5627,1615,89],["Pedra",151,153,0,0,2],["Pesqueira",473,976,534,82,9],["Petrolina",3383,6144,4314,1803,61],["Petrolândia",101,183,96,12,2],["Pombos",641,778,229,23,12],["Poção",8,45,46,0,1],["Primavera",129,210,27,0,3],["Quipapá",100,173,90,0,2],["Recife",22329,41190,27230,13305,471],["Riacho das Almas",186,266,203,0,4],["Ribeirão",451,889,723,236,14],["Rio Formoso",76,140,129,0,2],["Sairé",98,185,112,198,3],["Salgueiro",493,983,510,22,8],["Saloá",41,68,0,0,2],["Sanharó",178,238,100,0,2],["Santa Cruz",14,44,40,0,1],["Santa Cruz da Baixa Verde",60,85,0,0,1],["Santa Cruz do Capibaribe",1645,2450,1654,873,13],["Santa Maria da Boa Vista",167,362,168,0,5],["Santa Maria do Cambucá",110,161,66,0,3],["Santa Terezinha",60,112,76,0,2],["Serra Talhada",851,1482,1000,394,13],["Serrita",20,78,0,0,1],["Sertânia",157,267,210,0,3],["Sirinhaém",284,760,181,8,8],["Surubim",976,1689,1109,584,13],["São Benedito do Sul",57,107,46,0,2],["São Bento do Una",212,272,112,0,5],["São Caitano",308,568,437,78,7],["São Joaquim do Monte",135,211,110,0,2],["São José da Coroa Grande",167,247,83,0,3],["São José do Belmonte",144,269,7,0,3],["São José do Egito",193,283,66,0,4],["São João",28,65,44,0,1],["São Lourenço da Mata",1303,2812,1558,192,25],["São Vicente Férrer",180,315,179,0,3],["Tabira",160,232,81,0,3],["Tacaimbó",161,234,150,0,2],["Tacaratu",100,166,59,0,2],["Tamandaré",334,459,290,0,3],["Taquaritinga do Norte",314,504,202,0,5],["Timbaúba",1115,1208,644,136,8],["Toritama",514,742,469,199,6],["Tracunhaém",217,221,22,0,3],["Trindade",375,424,201,0,5],["Triunfo",65,94,74,0,2],["Venturosa",137,164,67,0,3],["Verdejante",20,46,0,0,1],["Vertentes",129,207,162,0,2],["Vicência",199,325,138,0,4],["Vitória de Santo Antão",2217,3936,2619,1184,58],["Água Preta",216,440,187,0,4],["Águas Belas",235,519,253,0,4]],"b":[[0,"Caetés I",448,589,429,0,7],[0,"Caetés III",376,404,94,0,5],[0,"Centro",282,774,556,153,4],[0,"Planalto",45,76,0,0,1],[0,"Timbó",208,560,359,236,5],[1,"Sobreira",154,275,254,98,4],[7,"Centro",115,261,318,0,2],[7,"Nossa Senhora da Conceição",154,202,0,0,2],[9,"Hildebrando Carneiro",33,169,121,0,1],[9,"Quinze",78,129,0,0,3],[10,"Cardeal",489,837,728,344,3],[10,"São Cristóvão",473,402,133,0,6],[10,"São Geraldo",41,43,0,0,1],[10,"São Miguel",115,122,66,0,1],[11,"Amaro Ferreira de Albuquerque",35,71,0,0,1],[16,"Centro",337,413,0,0,1],[16,"Cruzeiro",18,22,0,0,1],[16,"Encruzilhada de São João",27,36,0,0,1],[16,"Nossa Senhora Aparecida",40,62,0,0,1],[16,"Rosário",115,176,267,116,1],[16,"Santo Amaro",78,65,0,0,2],[16,"Santo Antônio",107,238,0,0,3],[16,"São Rafael",12,13,0,0,1],[16,"São Sebastião",172,238,127,38,3],[21,"Nossa Senhora do Bom Conselho",274,334,252,16,3],[25,"Bom Conselho",179,321,0,0,3],[25,"COHAB",181,790,442,0,5],[25,"Centro",128,489,652,318,5],[25,"Distrito Industrial Diper",110,156,134,74,2],[25,"Engenho Ilha",0,146,376,0,2],[25,"Gaibu",172,395,0,0,2],[25,"Garapu",190,507,211,0,4],[25,"Pirapama",55,104,0,0,1],[25,"Ponte dos Carvalhos",228,817,238,0,6],[25,"Pontezinha",143,313,0,0,2],[25,"Rosário",2,54,0,0,1],[25,"Santo Inácio",116,196,145,0,1],[25,"São Francisco",0,172,0,0,1],[25,"Vila Social Contra Mocambo",58,251,304,98,2],[29,"Alberto Maia",66,145,0,0,1],[29,"Aldeia dos Camarás",238,490,374,48,2],[29,"Alto Santo Antonio",48,44,0,0,1],[29,"Alto da Boa Vista",10,114,70,59,2],[29,"Bairro Novo do Carmelo",175,752,530,169,6],[29,"Bairro dos Estados",13,11,0,0,1],[29,"Céu Azul",13,38,0,0,1],[29,"Estação Nova",35,113,0,0,1],[29,"Jardim Primavera",65,206,158,0,1],[29,"Nazaré",54,174,0,0,2],[29,"Santa Mônica",48,80,0,0,1],[29,"Tabatinga",78,197,49,0,2],[29,"Timbi",410,1022,594,113,8],[29,"Vera Cruz",243,456,155,0,6],[29,"Vila da Fábrica",298,816,412,47,6],[29,"Vila da Inabi",44,129,0,0,1],[34,"ANDORINHA",44,53,22,0,1],[34,"Boa Vista",394,632,154,25,5],[34,"CIDADE JARDIM",192,321,126,0,3],[34,"Caiuca",53,76,20,0,1],[34,"Cidade Alta",55,44,0,0,1],[34,"DEPUTADO JOSÉ ANTÔNIO LIBERATO",164,424,197,0,2],[34,"Divinópolis",197,392,174,0,3],[34,"Indianópolis",101,208,217,55,3],[34,"Jardim Boa Vista",46,69,6,0,1],[34,"Maurício de Nassau",750,1779,1507,1032,10],[34,"Nossa Senhora das Dores",416,697,568,350,4],[34,"PINHEIRÓPOLIS",268,337,203,109,4],[34,"Petrópolis",140,343,210,84,3],[34,"Presidente Kennedy",241,545,172,0,7],[34,"Rendeiras",136,388,155,0,5],[34,"Salgado",579,1091,441,37,14],[34,"São Francisco",369,729,605,114,6],[34,"Universitário",475,826,539,413,5],[34,"Vassoural",146,224,18,0,3],[35,"Baixa Verde",193,384,252,0,2],[35,"Centro",230,414,255,0,5],[38,"Centro",37,82,0,0,1],[38,"Cruzeiro",106,109,0,0,1],[46,"Atalaia",29,64,0,0,1],[46,"Bela Vista",37,103,310,55,2],[46,"Boa Esperança",106,177,175,0,2],[46,"Centro",111,323,338,0,3],[46,"Cidade Centro",41,0,0,0,1],[46,"Mangueira",74,197,117,0,1],[46,"Maracujá",37,52,0,0,1],[46,"Nova Cidade",59,184,0,0,1],[46,"Nova Descoberta",43,43,0,0,1],[46,"Nova Escada",69,137,0,0,1],[46,"Povo Deus",44,107,0,0,1],[46,"Santo Antônio",29,59,0,0,1],[46,"São Sebastião",99,173,0,0,3],[54,"Aloísio Souto Pinto",74,131,0,0,2],[54,"Boa Vista",239,340,0,0,6],[54,"Dom Hélder Câmara",22,44,0,0,1],[54,"Dom Thiago Postma",47,160,155,0,1],[54,"Francisco Simão dos Santos Figueira",177,361,204,0,3],[54,"Heliópolis",372,711,469,164,9],[54,"Magano",146,0,0,0,1],[54,"Novo Heliópolis",72,94,0,0,2],[54,"Santo Antônio",715,1446,1225,753,10],[54,"Severiano Moraes Filho",220,380,129,0,4],[54,"São José",73,61,0,0,1],[55,"Centro",311,700,267,35,4],[60,"Agamenon",131,104,0,0,3],[60,"Ana de Albuquerque",133,219,152,0,2],[60,"Bela Vista",55,88,0,0,1],[60,"Centro",298,403,63,0,5],[60,"Cruz de Rebouças",56,174,130,0,1],[60,"Encanto Igarassu",122,218,137,0,3],[60,"Inhamã",14,39,0,0,1],[60,"Posto de Monta",33,132,85,0,1],[60,"Rubina",79,119,11,0,1],[60,"Santa Rita",92,123,0,0,1],[60,"Santo Antonio",30,280,316,140,2],[60,"Saramandaia",60,118,0,0,1],[60,"Triunfo",63,109,128,70,1],[60,"Umbura",136,464,331,131,2],[62,"Alto da Caixa D'Água",36,82,48,0,1],[62,"Antônio Dourado Neto",136,156,235,109,3],[62,"Centro",409,856,345,124,5],[62,"Santo Antônio",94,94,62,0,1],[63,"Vila Poço Verde",75,159,112,0,2],[66,"Cajueiro",0,71,6,0,2],[66,"Conceição",76,72,0,0,1],[66,"Espinheiro",194,233,187,50,2],[66,"Grêmio",16,0,0,0,1],[69,"Barra de Jangada",240,1024,202,0,7],[69,"Cajueiro Seco",732,1279,434,42,12],[69,"Candeias",943,2755,1804,851,28],[69,"Cavaleiro",600,1030,222,0,11],[69,"Centro",65,314,295,147,2],[69,"Curado",477,1304,741,108,13],[69,"Dois Carneiros",361,819,646,351,5],[69,"Guararapes",357,1063,517,28,8],[69,"Jardim Jordão",714,1122,489,167,10],[69,"Marcos Freire",246,531,333,0,3],[69,"Muribeca",320,452,268,0,3],[69,"Piedade",1185,2258,1527,820,20],[69,"Prazeres",431,937,400,137,11],[69,"Santana",50,67,0,0,1],[69,"Santo Aleixo",324,745,510,0,6],[69,"Sucupira",889,1380,416,0,16],[69,"Vila Rica",368,970,482,0,9],[69,"Vista Alegre",155,286,130,78,2],[69,"Zumbi do Pacheco",268,518,378,118,7],[70,"Centro",134,260,196,0,2],[73,"Asa Branca",117,171,203,0,1],[73,"Boa Vista",130,187,0,0,1],[73,"Bultrins",78,115,104,0,1],[73,"Neco de Léo",25,38,23,0,1],[83,"Centro",25,44,0,0,1],[83,"Dt Severino Pinheiro",87,115,7,0,2],[83,"José Fernades Salsa",175,280,154,55,3],[83,"Juá",88,142,101,0,1],[83,"Otácio de Lemos",17,10,0,0,1],[83,"Pirauira",74,148,137,64,1],[83,"Ponto Certo",49,108,77,0,2],[83,"São Sebastião",50,67,0,0,1],[90,"Aguazinha",31,56,0,0,2],[90,"Alto da Bondade",116,172,86,0,2],[90,"Alto da Conquista",245,355,189,0,5],[90,"Alto da Nação",39,51,0,0,1],[90,"Amaro Branco",87,135,0,0,1],[90,"Amparo",0,179,181,0,1],[90,"Bairro Novo",440,743,744,410,7],[90,"Bultrins",14,17,0,0,1],[90,"Caixa D'Água",83,308,0,0,3],[90,"Casa Caiada",327,590,495,424,7],[90,"Fragoso",230,534,235,0,7],[90,"Guadalupe",98,198,11,0,2],[90,"Jardim Atlântico",552,1105,923,499,11],[90,"Jardim Brasil",59,129,0,0,3],[90,"Monte",133,148,0,0,2],[90,"Ouro Preto",538,1328,814,225,15],[90,"Peixinhos",470,1330,495,0,11],[90,"Rio Doce",766,1656,695,214,20],[90,"Salgadinho",137,286,98,0,5],[90,"Sapucaia",211,737,322,0,7],[90,"São Benedito",28,34,0,0,1],[90,"Sítio Novo",79,42,0,0,2],[90,"Tabajara",163,437,204,0,8],[90,"Varadouro",130,270,354,232,2],[90,"Vila Popular",48,56,0,0,1],[90,"Águas Compridas",314,586,217,0,5],[97,"Centro",241,278,23,0,3],[99,"Arthur Lundgren I",530,905,626,66,6],[99,"Arthur Lundgren II",87,89,0,0,2],[99,"Centro",346,879,796,480,4],[99,"Engenho Maranguape",91,234,0,0,1],[99,"Fragoso",124,192,86,0,3],[99,"Jaguarana",53,68,0,0,1],[99,"Jaguaribe",118,258,0,0,3],[99,"Janga",482,1711,1245,445,21],[99,"Jardim Maranguape",0,15,0,0,1],[99,"Jardim Paulista",480,698,409,49,6],[99,"Maranguape I",601,1182,604,73,13],[99,"Maranguape II",551,985,477,55,10],[99,"Mirueira",130,246,82,0,3],[99,"Nobre",119,375,0,0,1],[99,"Nossa Senhora da Conceição",740,1641,859,198,7],[99,"Paratibe",377,608,0,0,2],[99,"Pau Amarelo",72,0,0,0,1],[99,"Torres Galvão",324,795,443,249,4],[101,"Centro",423,869,492,82,7],[101,"São Sebastião",17,27,0,0,1],[101,"Xucurus",33,80,42,0,1],[102,"Antônio Cassimiro",201,411,303,0,5],[102,"Areia Branca",492,938,753,298,7],[102,"Atrás da Banca",87,140,86,0,4],[102,"Caminho Do Sol",48,76,0,0,1],[102,"Centro",655,1385,1629,1105,10],[102,"Cidade Universitária",177,185,63,37,2],[102,"Cohab-Massangano",212,511,396,143,2],[102,"Cohab-São Francisco",14,14,0,0,1],[102,"Dom Avelar",219,301,32,0,6],[102,"Gercino Coelho",78,156,0,0,3],[102,"Jardim Maravilha",27,42,0,0,2],[102,"José e Maria",428,793,358,0,6],[102,"Palhinhas",5,18,0,0,1],[102,"Pedro Raimundo",203,305,95,0,3],[102,"São Gonçalo",160,328,196,0,2],[102,"São José",46,32,0,0,1],[102,"Vila Eduardo",293,464,403,220,4],[107,"Edson Lira Paula",100,173,90,0,2],[108,"Aflitos",85,0,0,0,1],[108,"Afogados",466,1357,684,132,14],[108,"Alto José Bonifácio",91,135,0,0,2],[108,"Alto José do Pinho",225,187,0,0,6],[108,"Alto Santa Terezinha",48,81,80,0,2],[108,"Alto do Mandu",253,474,352,116,5],[108,"Areias",518,851,297,99,14],[108,"Arruda",368,675,587,265,6],[108,"Barro",362,527,351,134,5],[108,"Beberibe",170,330,113,0,4],[108,"Boa Viagem",2910,4761,3634,2422,30],[108,"Boa Vista",298,778,536,236,6],[108,"Bomba do Hemetério",26,43,14,0,2],[108,"Brasília Teimosa",71,360,305,0,4],[108,"Brejo da Guabiraba",117,264,135,0,5],[108,"Brejo de Beberibe",138,354,160,0,4],[108,"Cajueiro",117,118,0,0,3],[108,"Campina do Barreto",75,199,0,0,4],[108,"Campo Grande",220,520,300,0,7],[108,"Casa Amarela",676,1165,648,167,15],[108,"Casa Forte",231,281,232,172,4],[108,"Caxangá",56,110,15,0,2],[108,"Caçote",62,134,0,0,2],[108,"Cidade Universitária",201,111,0,0,2],[108,"Cohab",794,1291,476,132,22],[108,"Coqueiral",51,371,216,143,4],[108,"Cordeiro",940,2268,1106,581,22],[108,"Curado",27,54,0,0,1],[108,"Córrego do Jenipapo",63,137,72,0,2],[108,"Derby",30,68,90,65,1],[108,"Dois Unidos",280,549,178,0,9],[108,"Encruzilhada",180,277,256,119,3],[108,"Engenho do Meio",116,454,297,99,5],[108,"Espinheiro",277,826,784,302,8],[108,"Estância",39,152,86,0,2],[108,"Fundão",0,93,36,0,2],[108,"Graças",1661,2883,2782,1848,14],[108,"Hipódromo",41,17,0,0,1],[108,"Ibura",398,831,321,0,12],[108,"Imbiribeira",956,1795,2205,1420,16],[108,"Ipsep",320,586,259,88,8],[108,"Iputinga",454,842,448,156,13],[108,"Jardim São Paulo",415,557,424,165,8],[108,"Jiquiá",248,533,664,470,4],[108,"Jordão",303,568,367,75,6],[108,"Linha do Tiro",37,119,0,0,1],[108,"Macaxeira",236,455,91,0,5],[108,"Madalena",535,880,884,697,10],[108,"Mangabeira",12,0,0,0,1],[108,"Mangueira",365,216,40,0,4],[108,"Morro da Conceição",289,535,55,0,6],[108,"Mustardinha",163,449,304,49,4],[108,"Nova Descoberta",230,456,222,38,7],[108,"Parnamirim",165,304,331,586,2],[108,"Passarinho",71,95,0,0,2],[108,"Pina",531,415,0,0,8],[108,"Porto da Madeira",110,275,295,175,6],[108,"Poço",195,249,40,32,6],[108,"Prado",151,228,37,0,6],[108,"Rosarinho",309,355,357,163,5],[108,"San Martin",407,815,274,100,12],[108,"Sancho",83,287,305,106,2],[108,"Santana",294,364,631,446,3],[108,"Santo Amaro",259,462,423,342,9],[108,"Soledade",0,0,136,222,4],[108,"Sítio dos Pintos - São Brás",45,118,0,0,2],[108,"Tamarineira",340,699,480,194,4],[108,"Tejipió",213,269,287,96,1],[108,"Torre",334,180,0,0,8],[108,"Torrões",59,289,112,12,5],[108,"Totó",104,251,119,0,3],[108,"Vasco da Gama",130,326,319,0,6],[108,"Várzea",856,2148,1496,481,15],[108,"Zumbí",99,352,372,160,3],[108,"Água Fria",330,632,110,0,9],[118,"Bairro Novo",518,770,374,195,5],[118,"Cruz Alta",85,168,65,23,3],[118,"Nova Santa Cruz",668,912,666,348,2],[118,"São Cristóvão",374,600,549,307,3],[122,"AABB",68,58,240,79,2],[122,"Bom Jesus",64,120,0,0,1],[122,"Nossa Senhora da Conceição",175,305,74,0,2],[122,"Nossa Senhora da Penha",349,753,577,260,3],[122,"São Cristóvão",195,246,109,55,4],[126,"Cabaceira",326,466,399,188,7],[126,"Centro",280,617,408,161,2],[126,"Diogo",117,321,302,235,2],[126,"São Sebastião",253,285,0,0,2],[135,"Bela Vista",105,386,281,0,3],[135,"Caiará",50,199,156,0,1],[135,"Capibaribe",48,0,0,0,1],[135,"Centro",188,456,386,109,4],[135,"Ercina Lapenda",36,83,0,0,1],[135,"Nova Tiuma",52,83,0,0,1],[135,"Parque Capibaribe",555,994,602,0,5],[135,"Penedo",52,179,0,0,1],[135,"Pixete",43,116,22,0,2],[135,"São João e São Paulo",53,58,0,0,2],[135,"Tiuma",44,98,100,83,1],[135,"Vila do Reinado",77,160,11,0,3],[142,"Centro",1056,1107,644,136,7],[142,"Cruzeiro",59,101,0,0,1],[149,"Prefeito Pedro Barbosa da Silva (Bairro São José)",129,207,162,0,2],[151,"Alto José Leal",159,242,0,0,3],[151,"Bela Vista",194,275,76,36,7],[151,"Cajá",468,863,366,164,8],[151,"Centro",189,478,541,287,6],[151,"Jardim Ipiranga",40,0,0,0,2],[151,"Jardim São Pedro",0,157,0,0,2],[151,"Livramento",192,574,739,235,7],[151,"Lídia Queiroz",181,0,0,0,3],[151,"Mangueira",120,299,193,0,1],[151,"Maranhão",47,0,0,0,1],[151,"Matriz",271,722,704,462,6],[151,"Nossa Senhora do Amparo",60,150,0,0,2],[151,"Redenção",57,176,0,0,3],[151,"Santana",23,0,0,0,1],[151,"São Vicente De Paulo",216,0,0,0,6],[152,"Centro",118,215,113,0,1],[152,"Jiquiá",79,173,74,0,2]]};
+var SEG=["Educação infantil","Anos iniciais","Anos finais","Ensino médio"];
+var $=function(i){return document.getElementById(i)};
+var nf=function(n){return n.toLocaleString("pt-BR")};
+var pf=function(n,d){return n.toLocaleString("pt-BR",{minimumFractionDigits:d||1,maximumFractionDigits:d||1})};
+var rf=function(n){return "R$ "+n.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})};
+
+var bs=document.querySelectorAll("nav button");
+for(var i=0;i<bs.length;i++)bs[i].onclick=function(){
+  for(var j=0;j<bs.length;j++)bs[j].classList.toggle("on",bs[j]===this);
+  var ss=document.querySelectorAll("section");
+  for(var k=0;k<ss.length;k++)ss[k].classList.toggle("on",ss[k].id===this.dataset.t);
+};
+
+D.m.forEach(function(m,i){var o=document.createElement("option");o.value=i;o.textContent=m[0];$("mun").appendChild(o)});
+$("mun").value=D.m.findIndex(function(m){return m[0]==="Recife"});
+function carregaBairros(){
+  var mi=+$("mun").value, s=$("bai");
+  s.innerHTML='<option value="">Município inteiro</option>';
+  D.b.forEach(function(b,i){ if(b[0]===mi){var o=document.createElement("option");o.value=i;o.textContent=b[1];s.appendChild(o)} });
+  s.disabled = s.options.length<2;
+}
+function calcMS(){
+  var mi=+$("mun").value, bi=$("bai").value, m=D.m[mi];
+  var q=[0,1,2,3].map(function(k){return Math.max(0,+($("q"+k).value||0))});
+  var tot=q.reduce(function(a,b){return a+b},0);
+  var b = bi==="" ? null : D.b[+bi];
+  $("msh").textContent = b ? "Sua escola em "+b[1]+" e em "+m[0] : "Sua escola em "+m[0];
+  var h='<tr><th>Etapa</th><th>Sua escola</th><th>'+(b?b[1]:m[0])+'</th><th>Seu share</th>'+
+        (b?'<th>'+m[0]+'</th><th>Share na cidade</th>':'')+'</tr>';
+  var sm=0,sb=0;
+  for(var k=0;k<4;k++){
+    var vm=m[k+1], vb=b?b[k+2]:0;
+    sm+=vm; sb+=vb;
+    var base=b?vb:vm;
+    h+='<tr><td>'+SEG[k]+'</td><td>'+nf(q[k])+'</td><td>'+nf(base)+'</td>'+
+       '<td class="sh">'+(base>0&&q[k]>0?pf(q[k]/base*100,1)+"%":"—")+'</td>'+
+       (b?'<td>'+nf(vm)+'</td><td class="sh">'+(vm>0&&q[k]>0?pf(q[k]/vm*100,1)+"%":"—")+'</td>':'')+'</tr>';
+  }
+  var baseT=b?sb:sm;
+  h+='<tr class="t"><td>Total</td><td><b>'+nf(tot)+'</b></td><td>'+nf(baseT)+'</td>'+
+     '<td class="sh">'+(baseT>0&&tot>0?pf(tot/baseT*100,2)+"%":"—")+'</td>'+
+     (b?'<td>'+nf(sm)+'</td><td class="sh">'+(sm>0&&tot>0?pf(tot/sm*100,2)+"%":"—")+'</td>':'')+'</tr>';
+  $("mst").innerHTML=h;
+}
+$("mun").onchange=function(){carregaBairros();calcMS()};
+$("bai").onchange=calcMS;
+[0,1,2,3].forEach(function(k){$("q"+k).oninput=calcMS});
+
+function cx(cls,val,rot){return '<div class="bx '+cls+'"><b>'+val+'</b><span>'+rot+'</span></div>'}
+function calcOc(){
+  var a=+($("o1").value||0), c=+($("o2").value||0);
+  if(!c){$("ocr").innerHTML="";return}
+  var p=a/c*100, livres=c-a;
+  $("ocr").innerHTML=cx(p>=95?"vm":(p>=70?"vd":"vm"),pf(p,1)+"%","taxa de ocupação")+
+    cx("az",nf(a),"alunos matriculados")+
+    cx(livres>0?"":"vd",nf(Math.max(0,livres)),livres>=0?"vagas ociosas":"acima da capacidade informada");
+}
+["o1","o2"].forEach(function(i){$(i).oninput=calcOc});
+function calcCh(){
+  var ini=+($("c1").value||0), sai=+($("c2").value||0);
+  if(!ini){$("chr").innerHTML="";return}
+  var p=sai/ini*100;
+  $("chr").innerHTML=cx(p>=15?"vm":(p>=8?"":"vd"),pf(p,1)+"%","taxa de evasão")+
+    cx("",nf(sai),"alunos que saíram")+
+    cx("vd",nf(Math.max(0,ini-sai)),"alunos que permaneceram")+
+    cx("az",pf(100-p,1)+"%","taxa de permanência");
+}
+["c1","c2"].forEach(function(i){$(i).oninput=calcCh});
+function calcTk(){
+  var r=+($("t1").value||0), a=+($("t2").value||0);
+  if(!a){$("tkr").innerHTML="";return}
+  var t=r/a;
+  $("tkr").innerHTML=cx("az",rf(t),"ticket médio mensal")+
+    cx("",rf(t*12),"por aluno ao ano")+
+    cx("vd",rf(r*12),"receita anual no ritmo atual");
+}
+["t1","t2"].forEach(function(i){$(i).oninput=calcTk});
+
+carregaBairros(); calcMS();
+</script></body></html>
