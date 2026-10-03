@@ -454,8 +454,13 @@ function calcMS(){
        apareceu. Fica numa faixa propria, e a conta fecha com o total do raio. */
     if(v24<=0){ cl=2; novas++; mNovas+=v }
     else if(Math.abs(d)<=2 || Math.abs(d)/v24<=0.02){ cl=0; estav++; mEstav+=v }
+    /* o contador deste laço NÃO pode se chamar q: var vale na função inteira,
+       e q é o vetor das matrículas da escola, montado lá em cima. Chamá-lo de
+       q aqui trocava o vetor pelo número 4, e a coluna "sua escola" virava NaN
+       — só a partir do primeiro concorrente em alta, que é o que faz o laço
+       rodar. O total escapava por ser somado antes daqui.                    */
     else if(d>0){ cl=1; alta++; mAlta+=v;
-      for(var q=0;q<4;q++){ etA[q]+=e[ET25[q]]; etA24[q]+=e[ET24[q]] } }
+      for(var qq=0;qq<4;qq++){ etA[qq]+=e[ET25[qq]]; etA24[qq]+=e[ET24[qq]] } }
     else { cl=-1; queda++; mQueda+=v }
     CL.push(cl);
   }
@@ -539,11 +544,13 @@ function calcMS(){
     for(k=0;k<4;k++){ if(q[k]>0&&mer[k]>0){ sh.push([k, q[k]/mer[k]*100]); algum=true } }
     if(algum&&sh.length>1){
       sh.sort(function(a,b){return b[1]-a[1]});
-      var alta=sh[0], baixa=sh[sh.length-1];
-      le='<p>No seu território você é mais forte em <b>'+SEG[alta[0]].toLowerCase()+'</b>, com '+
-         pf(alta[1])+'% do mercado, e mais fraca em <b>'+SEG[baixa[0]].toLowerCase()+'</b>, com '+
+      /* "alta" ja e o contador de escolas em alta, la em cima; reusar o nome
+         aqui o apagaria assim que esta leitura rodasse. Outro nome.          */
+      var forte=sh[0], baixa=sh[sh.length-1];
+      le='<p>No seu território você é mais forte em <b>'+SEG[forte[0]].toLowerCase()+'</b>, com '+
+         pf(forte[1])+'% do mercado, e mais fraca em <b>'+SEG[baixa[0]].toLowerCase()+'</b>, com '+
          pf(baixa[1])+'%. ';
-      le+= (alta[1]>=2*baixa[1])
+      le+= (forte[1]>=2*baixa[1])
         ? 'A distância entre as duas é grande: ou a etapa fraca é uma oportunidade de captação '+
           'dentro de casa, ou é onde o aluno sai da sua escola para outra.'
         : 'As duas andam juntas, o que sugere participação equilibrada ao longo da trajetória do aluno.';
