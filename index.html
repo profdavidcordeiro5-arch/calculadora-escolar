@@ -455,29 +455,77 @@ function pegaRaio(){
    a celula vira um circulo de mesma area e se calcula a interseccao dos dois.
    No raio de 5 km a diferenca e pequena; no de 1 km e ela que separa um numero
    util de um numero errado.                                                   */
-var DEM=null, DEMFALHOU=false, demPedido=false;
-function pedeDemanda(){
-  if(DEM||demPedido||DEMFALHOU) return;
-  demPedido=true;
-  fetch("demanda.json").then(function(r){ return r.ok?r.json():null })
-    .then(function(j){ if(j) DEM=preparaDem(j); else DEMFALHOU=true; pintaDemanda() })
-    .catch(function(){ DEMFALHOU=true; demPedido=false; pintaDemanda() });
+/* O salario minimo de 2022, R$ 1.212,00, em vigor desde 1º de janeiro daquele
+   ano e portanto na data de referencia do Censo. A conversao tem que usar o SM
+   do mesmo ano do rendimento: dividir renda de 2022 pelo minimo de hoje
+   misturaria dois momentos e encolheria a faixa de todo mundo.              */
+var SM22=1212;
+function faixaSM(r){
+  var n=r/SM22;
+  if(n<=1)  return "Até 1 salário mínimo";
+  if(n<=2)  return "Entre 1 e 2 salários mínimos";
+  if(n<=3)  return "Entre 2 e 3 salários mínimos";
+  if(n<=5)  return "Entre 3 e 5 salários mínimos";
+  if(n<=10) return "Entre 5 e 10 salários mínimos";
+  return "Mais de 10 salários mínimos";
 }
+/* O dado vem por estado, em dados/<uf>.json: 450.046 setores censitarios no
+   Brasil pesam 14 MB juntos, peso demais para abrir na reuniao. A pagina le o
+   indice (minusculo) e busca so as UFs que o raio toca - inclusive a vizinha,
+   quando o CEP esta perto de uma divisa. Cada arquivo fica guardado depois.  */
+var DEMUF={}, DEMIDX=null, DEMFALHOU=false, DEMCOD=0, idxPedido=false, carregando=0;
+
+function pedeDemanda(){
+  if(!pt) return;
+  if(!DEMIDX){
+    if(idxPedido||DEMFALHOU) return;
+    idxPedido=true;
+    fetch("dados/indice.json").then(function(r){
+        if(!r.ok){ DEMCOD=r.status; return null }
+        return r.json();
+      })
+      .then(function(j){ if(j){ DEMIDX=j; pedeDemanda() } else { DEMFALHOU=true; pintaDemanda() } })
+      .catch(function(){ DEMFALHOU=true; DEMCOD=0; idxPedido=false; pintaDemanda() });
+    return;
+  }
+  /* margem generosa: a UF vizinha entra quando a borda dela chega perto */
+  var marg=raio+12;
+  var gl=marg/110.574, go=marg/(111.320*Math.cos(pt[0]*Math.PI/180));
+  for(var uf in DEMIDX){
+    var b=DEMIDX[uf].bb;
+    if(pt[0]<b[0]-gl||pt[0]>b[2]+gl||pt[1]<b[1]-go||pt[1]>b[3]+go) continue;
+    carregaUF(uf);
+  }
+}
+function carregaUF(uf){
+  if(DEMUF[uf]!==undefined) return;
+  DEMUF[uf]=null; carregando++;
+  fetch("dados/"+uf.toLowerCase()+".json").then(function(r){
+      if(!r.ok){ DEMCOD=r.status; return null }
+      return r.json();
+    })
+    .then(function(j){ carregando--;
+      if(j) DEMUF[uf]=preparaDem(j); else { delete DEMUF[uf]; DEMFALHOU=true }
+      pintaDemanda() })
+    .catch(function(){ carregando--; delete DEMUF[uf]; DEMFALHOU=true; DEMCOD=0; pintaDemanda() });
+}
+function temDem(){ for(var u in DEMUF) if(DEMUF[u]) return true; return false }
+
 function preparaDem(j){
-  var d=j.d, n=d.length, q=0, r=0, i, L;
-  var la=new Float64Array(n), lo=new Float64Array(n);
+  var d=j.d, n=d.length, la=0, lo=0, i, L;
+  var LA=new Float64Array(n), LO=new Float64Array(n), RC=new Float64Array(n);
   var a=[new Int32Array(n),new Int32Array(n),new Int32Array(n),new Int32Array(n)];
   var resp=new Int32Array(n), rmed=new Int32Array(n);
-  var S3=Math.sqrt(3);
   for(i=0;i<n;i++){
-    L=d[i]; q+=L[0]; r+=L[1];                 /* o arquivo vem em delta */
-    /* axial -> km, a volta exata da conta que montou a grade */
-    var x=j.s*(S3*q + S3/2*r), y=j.s*(1.5*r);
-    la[i]=j.lat0+y/j.kmlat; lo[i]=j.lon0+x/j.kmlon;
-    a[0][i]=L[2]; a[1][i]=L[3]; a[2][i]=L[4]; a[3][i]=L[5];
-    resp[i]=L[6]; rmed[i]=L[7];
+    L=d[i]; la+=L[0]; lo+=L[1];                /* lat e lon vêm em delta */
+    LA[i]=la/1e5; LO[i]=lo/1e5;
+    /* cada setor tem a área publicada pelo IBGE: o círculo de mesma área é o
+       que entra na conta de encaixe, em vez de uma célula fixa para todos */
+    RC[i]=Math.sqrt((L[2]/1e4)/Math.PI);     /* área vem em unidades de 100 m² */
+    a[0][i]=L[3]; a[1][i]=L[4]; a[2][i]=L[5]; a[3][i]=L[6];
+    resp[i]=L[7]; rmed[i]=L[8];
   }
-  return {n:n,la:la,lo:lo,a:a,resp:resp,rmed:rmed,rcel:j.rcel,fonte:j.fonte};
+  return {n:n, la:LA, lo:LO, rc:RC, a:a, resp:resp, rmed:rmed};
 }
 /* area da interseccao de dois circulos - a "lente" */
 function lente(R,r,d){
@@ -489,23 +537,38 @@ function lente(R,r,d){
   return R2*(a1-Math.sin(2*a1)/2) + r2*(a2-Math.sin(2*a2)/2);
 }
 function demNoRaio(){
-  if(!DEM||!pt) return null;
-  var R=raio, rc=DEM.rcel, acel=Math.PI*rc*rc;
-  var gl=(R+rc)/110.574, go=(R+rc)/(111.320*Math.cos(pt[0]*Math.PI/180));
-  var o={a:[0,0,0,0], resp:0, rendaSoma:0, celulas:0};
-  for(var i=0;i<DEM.n;i++){
-    if(Math.abs(DEM.la[i]-pt[0])>gl || Math.abs(DEM.lo[i]-pt[1])>go) continue;
-    var d=km(pt[0],pt[1],DEM.la[i],DEM.lo[i]);
-    var w=lente(R,rc,d)/acel;
-    if(w<=0) continue;
-    for(var k=0;k<4;k++) o.a[k]+=DEM.a[k][i]*w;
-    o.resp+=DEM.resp[i]*w;
-    o.rendaSoma+=DEM.rmed[i]*DEM.resp[i]*w;
-    o.celulas++;
+  if(!pt||!temDem()) return null;
+  var R=raio;
+  var o={a:[0,0,0,0], resp:0, rendaSoma:0, celulas:0, faixas:[0,0,0,0], semInfo:0, exato1:0};
+  for(var uf in DEMUF){
+    var D=DEMUF[uf]; if(!D) continue;
+    for(var i=0;i<D.n;i++){
+      var rc=D.rc[i];
+      var gl=(R+rc)/110.574, go=(R+rc)/(111.320*Math.cos(pt[0]*Math.PI/180));
+      if(Math.abs(D.la[i]-pt[0])>gl || Math.abs(D.lo[i]-pt[1])>go) continue;
+      var d=km(pt[0],pt[1],D.la[i],D.lo[i]);
+      var w=lente(R,rc,d)/(Math.PI*rc*rc);
+      if(w<=0) continue;
+      for(var k=0;k<4;k++) o.a[k]+=D.a[k][i]*w;
+      o.resp+=D.resp[i]*w;
+      o.rendaSoma+=D.rmed[i]*D.resp[i]*w;
+      if(D.rmed[i]>0){
+        var sm=D.rmed[i]/SM22;
+        var b = sm<=1 ? 0 : (sm<=3 ? 1 : (sm<=5 ? 2 : 3));
+        o.faixas[b]+=D.resp[i]*w;
+        /* No Brasil o salario minimo nao e so um limite: e o valor que a maior
+           parte dos responsaveis realmente recebe, e meia PE tem mediana
+           exatamente nele. Sem separar isso, a primeira faixa parece miseria
+           quando na verdade diz "a familia tipica daqui ganha um minimo".   */
+        if(Math.abs(D.rmed[i]-SM22)<=1) o.exato1+=D.resp[i]*w;
+      } else o.semInfo+=D.resp[i]*w;
+      o.celulas++;
+    }
   }
   o.renda = o.resp>0 ? o.rendaSoma/o.resp : 0;
-  for(k=0;k<4;k++) o.a[k]=Math.round(o.a[k]);
-  o.resp=Math.round(o.resp);
+  for(k=0;k<4;k++){ o.a[k]=Math.round(o.a[k]); o.faixas[k]=Math.round(o.faixas[k]) }
+  o.resp=Math.round(o.resp); o.semInfo=Math.round(o.semInfo);
+  o.exato1=Math.round(o.exato1);
   return o;
 }
 
@@ -518,12 +581,17 @@ function pintaDemanda(){
   if(DEMFALHOU){
     bx.innerHTML='<div class="ft">A demanda do território</div><div class="notaf">'+
       (location.protocol==="file:"
-        ? 'A população do Censo fica num arquivo à parte, e o navegador não deixa uma página '+
-          'aberta direto do disco buscar outro arquivo. Abra pelo endereço do site e ela aparece.'
-        : 'Os dados de população do Censo não carregaram — eles ficam num arquivo à parte, de '+
-          '3 MB, e precisam de internet na primeira vez. O restante da página não depende deles.')+
-      '</div>'; bc.innerHTML=""; return }
-  if(!DEM){
+        ? 'A população do Censo fica na pasta <b>dados/</b>, e o navegador não deixa uma página '+
+          'aberta direto do disco buscar outro arquivo. Abra pelo endereço do site.'
+        : DEMCOD===404
+        ? 'A pasta <b>dados/</b> não está publicada neste endereço. Ela tem um arquivo por '+
+          'estado e vai junto com o <b>index.html</b>. Suba a pasta inteira e recarregue.'
+        : DEMCOD
+        ? 'O servidor respondeu <b>'+DEMCOD+'</b> ao buscar a população do Censo.'
+        : 'A população do Censo não carregou: ela precisa de internet na primeira vez em cada '+
+          'estado. Depois disso fica guardada no aparelho.')+
+      ' O restante da página não depende dela.</div>'; bc.innerHTML=""; return }
+  if(!temDem()){
     bx.innerHTML='<div class="ft">A demanda do território</div>'+
       '<div class="notaf">Buscando a população do Censo 2022 no raio…</div>';
     bc.innerHTML=""; return }
@@ -546,8 +614,50 @@ function pintaDemanda(){
     '<tr><td>5 a 9 anos</td><td>'+nf(o.a[1])+'</td><td class="sh2">anos iniciais</td></tr>'+
     '<tr><td>10 a 14 anos</td><td>'+nf(o.a[2])+'</td><td class="sh2">anos finais</td></tr>'+
     '<tr><td>15 a 19 anos</td><td>'+nf(o.a[3])+'</td><td class="sh2">ensino médio</td></tr>'+
-    '<tr class="t"><td>Renda mediana do responsável</td><td colspan="2"><b>'+
-      (o.renda>0?rf(o.renda):'—')+'</b> por mês</td></tr></table>';
+    '<tr class="t"><td>Renda mediana do responsável</td><td><b>'+
+      (o.renda>0?rf(o.renda):'—')+'</b></td><td class="sh">'+
+      (o.renda>0?'<b>'+pf(o.renda/SM22,1)+'</b> SM':'—')+'</td></tr></table>';
+  if(o.renda>0){
+    h+='<div class="notaf"><b>'+faixaSM(o.renda)+'.</b> O salário mínimo em vigor na data do '+
+       'Censo era de '+rf(SM22)+' — é por ele que a conta é feita, porque o rendimento também é '+
+       'de 2022. Mediana, não média: é o rendimento da família do meio, que não sobe por causa '+
+       'de poucas rendas muito altas no raio.</div>';
+    /* ---- famílias por faixa de salário mínimo ---- */
+    var FX=[['Até 1 SM','#B8352B','até '+rf(SM22)],
+            ['De 1 a 3 SM','#C9A063',rf(SM22)+' a '+rf(3*SM22)],
+            ['De 3 a 5 SM','#22314E',rf(3*SM22)+' a '+rf(5*SM22)],
+            ['Mais de 5 SM','#1E7A43','acima de '+rf(5*SM22)]];
+    var somaF=o.faixas[0]+o.faixas[1]+o.faixas[2]+o.faixas[3];
+    if(somaF>0){
+      h+='<table><tr><th>Famílias por faixa de renda</th><th>Responsáveis</th>'+
+         '<th>Do raio</th></tr>';
+      for(var f=0;f<4;f++){
+        h+='<tr><td><i class="pt" style="background:'+FX[f][1]+'"></i>'+FX[f][0]+
+           '<br><i class="mi">'+FX[f][2]+'</i></td><td>'+nf(o.faixas[f])+'</td>'+
+           '<td class="sh">'+pf(o.faixas[f]/somaF*100,1)+'%</td></tr>';
+      }
+      h+='<tr class="t"><td>Total com renda informada</td><td><b>'+nf(somaF)+'</b></td>'+
+         '<td>'+(o.semInfo>0?'<span class="mi">+'+nf(o.semInfo)+' sem informação</span>':'')+
+         '</td></tr></table>';
+      if(o.exato1>0 && o.faixas[0]>0){
+        h+='<div class="notaf"><b>Atenção à primeira faixa.</b> Dentro das '+nf(o.faixas[0])+
+           ' famílias de até 1 SM, <b>'+nf(o.exato1)+'</b> moram em áreas cuja renda mediana é '+
+           '<i>exatamente</i> um salário mínimo — '+pf(o.exato1/o.faixas[0]*100,0)+'% delas. '+
+           'No Brasil o mínimo não é só um teto de faixa: é o valor que a maior parte dos '+
+           'responsáveis de fato recebe. Essa faixa diz "a família típica daqui ganha um '+
+           'mínimo", e não que ela ganha menos do que isso.</div>';
+      }
+      h+='<div class="notaf"><b>Leia "moram em áreas de", não "ganham".</b> O Censo não publica '+
+         'faixa de renda por território — publica a renda mediana de cada área. Então cada '+
+         'família entra na faixa da <i>área onde mora</i>, com o número de responsáveis que a '+
+         'área tem. É contagem, não estimativa: não ajustei curva nenhuma. O que a conta não '+
+         'enxerga é a desigualdade dentro de cada área — a família rica num bairro pobre aparece '+
+         'na faixa do bairro. Este raio foi somado a partir de <b>'+o.celulas+
+         (o.celulas===1?' área':' áreas')+'</b> do Censo'+
+         (o.celulas<6?', o que é pouco para separar faixas com firmeza — abra o raio para uma '+
+          'leitura mais estável':'')+'.</div>';
+    }
+  }
   h+='<div class="big">'+
      cx2(por100>=100?"vd":"",pf(por100,0),'matrículas particulares de 5 a 14 anos para cada 100 crianças morando no raio')+
      cx2(d59c>=0?"vd":"vm",sinal(d59c),'a próxima turma de anos iniciais, contra a de hoje')+'</div>';
@@ -954,9 +1064,10 @@ function calcTk(){
   av.className="av "+tom;
   av.style.display="";
   av.innerHTML="<b>"+pf(p,1)+"% da renda mediana do responsável</b> no raio de "+pf(raio,0)+
-    " km, que é de "+rf(o.renda)+" por mês. Um ticket de "+rf(t)+" "+frase+
-    "<br><span class='mi'>Renda do responsável pelo domicílio, Censo 2022. A conta usa o raio "+
-    "escolhido na aba de market share.</span>";
+    " km, que é de "+rf(o.renda)+" por mês — "+pf(o.renda/SM22,1)+" salários mínimos. Um ticket "+
+    "de "+rf(t)+", que vale "+pf(t/SM22,2)+" SM, "+frase+
+    "<br><span class='mi'>Renda do responsável pelo domicílio, Censo 2022, e salário mínimo de "+
+    "2022 ("+rf(SM22)+"). A conta usa o raio escolhido na aba de market share.</span>";
 }
 ["o1","o2"].forEach(function(i){$(i).oninput=calcOc});
 ["c1","c2"].forEach(function(i){$(i).oninput=calcCh});
