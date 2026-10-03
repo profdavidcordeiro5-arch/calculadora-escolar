@@ -83,7 +83,14 @@ td.sh{font-weight:700;color:var(--ou)}
 .cx{border:1px solid var(--lin);border-radius:13px;background:#fff;overflow:hidden}
 .cx h3{font:600 11.5px var(--c);color:var(--tx2);padding:13px 20px;border-bottom:1px solid var(--lin);
  background:var(--cre2);letter-spacing:.05em;text-transform:uppercase}
+/* o botão das ruas mora na própria faixa do título, para não roubar altura do mapa */
+#bruas{float:right;margin:-3px -6px 0 0;border:1px solid var(--lin);background:#fff;
+ border-radius:999px;padding:3px 11px;font:600 10.5px var(--c);letter-spacing:.05em;
+ text-transform:uppercase;color:var(--tx3);cursor:pointer}
+#bruas:hover{color:var(--mar);border-color:var(--ou2)}
+#bruas[aria-pressed="true"]{background:var(--mar);border-color:var(--mar);color:#fff}
 #mapa{display:block;width:100%;height:330px;background:#F2F0EA}
+.cred{font-size:10.5px;color:var(--tx3);padding:0 14px 11px;line-height:1.4}
 .legm{display:flex;gap:14px;flex-wrap:wrap;padding:11px 20px;font-size:12px;color:var(--tx2);
  border-top:1px solid #F2EDE4}
 .legm i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;
@@ -179,14 +186,16 @@ footer p{margin-bottom:9px;line-height:1.6}
   <div class="big" id="cartoes"></div>
 
   <div class="painel">
-    <div class="cx"><h3>O território</h3>
+    <div class="cx"><h3>O território
+      <button id="bruas" type="button" aria-pressed="false">ruas</button></h3>
       <canvas id="mapa"></canvas>
       <div class="legm">
         <span><i style="background:#B8352B"></i>com ensino médio</span>
         <span><i style="background:#22314E"></i>até o fundamental</span>
         <span><i style="background:#C9A063"></i>só educação infantil</span>
         <span><i style="background:#16233C;box-shadow:0 0 0 2px #C9A063"></i>seu CEP</span>
-      </div></div>
+      </div>
+      <div class="cred" id="cred"></div></div>
     <div class="cx"><h3>Trajetória do território</h3><div id="traj"></div></div>
   </div>
 
@@ -197,7 +206,12 @@ footer p{margin-bottom:9px;line-height:1.6}
   <div class="nota" style="margin-top:12px"><b>Privacidade.</b> Esta página não mostra o nome nem o
   número de nenhuma escola concorrente, e não os guarda: do concorrente, o arquivo tem apenas
   coordenada, etapas oferecidas e histórico de matrícula. No mapa cada ponto é uma escola,
-  todos do mesmo tamanho — ele responde quantos e onde, nunca quem.</div>
+  todos do mesmo tamanho — ele responde quantos e onde, nunca quem.
+  <br><br>O desenho das ruas é a única coisa que vem de fora, e só quando você aperta
+  <b>ruas</b> — desligado, nada sai da página. Ligado, os blocos do mapa são buscados no servidor
+  da Esri, que por isso enxerga a região consultada. O CEP digitado e as matrículas não vão junto:
+  eles não saem do seu aparelho em momento nenhum. Sem internet, ou se o servidor de mapas
+  recusar, as ruas não aparecem e todo o resto continua funcionando.</div>
   <div class="nota" style="margin-top:12px"><b>CEP.</b> A base de CEP vem dos endereços do Catálogo
   de Escolas do INEP. Quando o CEP exato não está nela, o ponto vem do prefixo — e a página avisa,
   logo abaixo do campo, com que precisão respondeu.</div>
@@ -452,6 +466,85 @@ function calcMS(){
 }
 
 /* ---------- território ---------- */
+/* ---------- camada de ruas ----------
+   Os blocos de imagem vêm de fora, então o desenho é feito para sobreviver à
+   ausência deles: o que falhar simplesmente não aparece, e o território
+   continua legível com o círculo e os pontos, como antes de existir mapa.    */
+/* De onde vem a rua.
+   Era CARTO, e nunca apareceu: a CARTO passou a exigir chave e carimba
+   "API KEY REQUIRED" por cima de quem usa sem ela. Agora e o mesmo servidor
+   dos mapas estaduais - Esri, sem chave, que ja sabemos que responde.
+   O segundo provedor fica pronto para o dia em que a Esri fizer o que a CARTO
+   fez: basta preencher CHAVE_RUAS e trocar uma palavra em TPROV. Nenhum dos
+   dois e carregado enquanto o botao estiver desligado.                       */
+var CHAVE_RUAS = "";
+var RUASON = false;
+var TPROVS={
+  esri:{max:19, cred:'ruas © Esri · HERE · Garmin',
+    url:function(z,x,y){
+      return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map"+
+             "/MapServer/tile/"+z+"/"+y+"/"+x}},          /* na Esri a linha vem antes da coluna */
+  geoapify:{max:19, cred:'ruas © OpenStreetMap · Powered by Geoapify',
+    url:function(z,x,y){
+      return "https://maps.geoapify.com/v1/tile/positron/"+z+"/"+x+"/"+y+
+             "@2x.png?apiKey="+encodeURIComponent(CHAVE_RUAS)}}
+};
+var TPROV=TPROVS.esri;
+
+var TCACHE={}, TORDEM=[], TMAX=320, TFALHA=0, tagenda=null;
+function merX(lo){return (lo+180)/360*256}
+function merY(la){var s=Math.sin(la*Math.PI/180);
+  return (0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*256}
+function redesenha(){
+  if(tagenda)return;
+  tagenda=requestAnimationFrame(function(){tagenda=null; desenha()});
+}
+function tpede(u){
+  var r=TCACHE[u];
+  if(r) return r.ok?r.img:null;
+  if(TFALHA>10) return null;          /* sem internet: para de insistir */
+  var img=new Image();
+  r={img:img, ok:false}; TCACHE[u]=r; TORDEM.push(u);
+  if(TORDEM.length>TMAX) delete TCACHE[TORDEM.shift()];
+  img.onload=function(){ r.ok=true; redesenha() };
+  /* o redesenho tambem no erro: sem ele a falha era calada - a pagina ficava
+     com o circulo vazio e nunca dizia que o mapa nao veio.                   */
+  img.onerror=function(){ TFALHA++; redesenha() };
+  img.src=u;
+  return null;
+}
+/* Desenha as ruas sob o território. Devolve quantos blocos entraram, para a
+   página saber se deve avisar que o mapa não veio.                           */
+function ruas(ctx,cx,cy,R){
+  if(!RUASON) return 0;
+  var la=pt[0], lo=pt[1];
+  var mpp0=156543.033928*Math.cos(la*Math.PI/180);   /* metros por pixel no zoom 0 */
+  var z=Math.round(Math.log(mpp0*R/(raio*1000))/Math.LN2);
+  if(z<2)z=2; if(z>TPROV.max)z=TPROV.max;
+  var n=Math.pow(2,z), mpp=mpp0/n;
+  /* s faz o bloco casar exatamente com a escala em que os pontos são plotados */
+  var s=R*mpp/(raio*1000);
+  var wx=merX(lo)*n, wy=merY(la)*n, tam=256*s, feitos=0;
+  var ax=Math.floor((wx-R/s)/256), bx=Math.floor((wx+R/s)/256);
+  var ay=Math.floor((wy-R/s)/256), by=Math.floor((wy+R/s)/256);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.clip();
+  for(var tx=ax;tx<=bx;tx++) for(var ty=ay;ty<=by;ty++){
+    if(ty<0||ty>=n) continue;
+    var im=tpede(TPROV.url(z,((tx%n)+n)%n,ty));
+    if(!im) continue;
+    /* a fração de pixel deixaria um fio claro entre blocos; o meio pixel a
+       mais fecha a emenda sem deslocar nada visivelmente.                    */
+    ctx.drawImage(im, cx+(tx*256-wx)*s, cy+(ty*256-wy)*s, tam+0.5, tam+0.5);
+    feitos++;
+  }
+  /* véu de creme: joga a rua para trás e devolve contraste aos pontos */
+  ctx.fillStyle="rgba(246,242,234,.42)";
+  ctx.fillRect(cx-R-1,cy-R-1,2*R+2,2*R+2);
+  ctx.restore();
+  return feitos;
+}
+
 function desenha(){
   var c=$("mapa"); if(!c)return;
   var ctx=c.getContext("2d"), dpr=window.devicePixelRatio||1;
@@ -470,11 +563,17 @@ function desenha(){
   var cx=W/2, cy=H/2;
   function px(lo){return cx+(lo-pt[1])*kmlon*esc}
   function py(la){return cy-(la-pt[0])*kmlat*esc}
-  ctx.strokeStyle="rgba(22,35,60,.13)"; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  /* as ruas vão por baixo de tudo; sem elas o território fica como antes */
+  var blocos=ruas(ctx,cx,cy,R);
+  if(!blocos){
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832);
+    ctx.fillStyle="rgba(169,128,62,.07)"; ctx.fill();
+  }
+  ctx.strokeStyle=blocos?"rgba(22,35,60,.26)":"rgba(22,35,60,.13)";
+  ctx.lineWidth=1; ctx.setLineDash([4,4]);
   for(var k=1;k<raio;k++){ ctx.beginPath(); ctx.arc(cx,cy,esc*k,0,6.2832); ctx.stroke() }
   ctx.setLineDash([]);
   ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832);
-  ctx.fillStyle="rgba(169,128,62,.07)"; ctx.fill();
   ctx.strokeStyle="#A9803E"; ctx.lineWidth=1.8; ctx.stroke();
   /* ponto do mesmo tamanho para todo mundo: o mapa responde quantos e onde,
      nunca quem e grande.                                                     */
@@ -482,8 +581,9 @@ function desenha(){
     var e=E[dentro[i]];
     var cor = e[MED]>0 ? "#B8352B" : ((e[AI]>0||e[AF]>0) ? "#22314E" : "#C9A063");
     ctx.beginPath(); ctx.arc(px(e[LO]),py(e[LA]),5,0,6.2832);
-    ctx.fillStyle=cor; ctx.globalAlpha=.8; ctx.fill(); ctx.globalAlpha=1;
-    ctx.strokeStyle="#fff"; ctx.lineWidth=1.3; ctx.stroke();
+    ctx.fillStyle=cor; ctx.globalAlpha=blocos?.92:.8; ctx.fill(); ctx.globalAlpha=1;
+    /* sobre a rua o ponto precisa de um aro mais firme para não sumir */
+    ctx.strokeStyle="#fff"; ctx.lineWidth=blocos?1.7:1.3; ctx.stroke();
   }
   ctx.beginPath(); ctx.arc(cx,cy,7,0,6.2832);
   ctx.fillStyle="#16233C"; ctx.fill();
@@ -491,6 +591,12 @@ function desenha(){
   ctx.font="600 11px "+getComputedStyle(document.body).fontFamily;
   ctx.fillStyle="#5A6676"; ctx.textAlign="center";
   ctx.fillText(pf(raio,0)+" km", cx, cy-R-9);
+  /* crédito do mapa: obrigação de quem usa OpenStreetMap, e some junto com ele */
+  var cred=$("cred");
+  if(cred) cred.innerHTML = blocos ? TPROV.cred
+    : (RUASON&&TFALHA ? "o mapa de ruas não carregou — sem internet, ou o servidor de mapas "+
+        "recusou. O território, os números e as posições continuam corretos: eles não dependem "+
+        "da rua." : "");
 }
 
 /* ---------- ocupação, churn, ticket: como já estavam ---------- */
@@ -539,6 +645,16 @@ document.querySelectorAll("[data-r]").forEach(function(b){
   };
 });
 window.addEventListener("resize",function(){ if(pt)desenha() });
+$("bruas").onclick=function(){
+  RUASON=!RUASON;
+  this.setAttribute("aria-pressed", RUASON?"true":"false");
+  /* ao religar depois de uma falha, limpa o que ficou marcado como perdido:
+     sem isso o bloco que falhou uma vez nunca mais seria pedido de novo. */
+  if(RUASON&&TFALHA){ TCACHE={}; TORDEM=[]; TFALHA=0 }
+  try{ localStorage.setItem("ruas", RUASON?"1":"0") }catch(e){}
+  desenha();
+};
+try{ if(localStorage.getItem("ruas")==="1") $("bruas").onclick() }catch(e){}
 calcMS();
 </script>
 <script>
