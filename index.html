@@ -118,6 +118,23 @@ td.sh{font-weight:700;color:var(--ou)}
 .av{background:#FBF3E3;border:1px solid #E6D3AC;border-left:3px solid var(--ou);border-radius:10px;
  padding:13px 17px;margin-top:16px;font-size:13.5px;color:#6E5417;line-height:1.6}
 .av b{color:#5A430F}
+/* o aviso do ticket muda de tom conforme o preço cabe ou não no raio */
+.av.vd{background:#EEF7F0;border-color:#CBE4D3;border-left-color:var(--vd);color:#285C3A}
+.av.vd b{color:#1E4A2D}
+.av.vm{background:#FCEFEE;border-color:#EFCFCC;border-left-color:var(--vm);color:#7A3029}
+.av.vm b{color:#5E231E}
+/* blocos de demanda: mesma casca das seções, para não parecerem enxerto */
+.bloco{margin-top:30px;border:1px solid var(--lin);border-radius:13px;background:#fff;
+ overflow:hidden}
+.bloco:empty{display:none}
+.bloco .ft{font:600 11.5px var(--c);color:var(--tx2);padding:13px 20px;
+ border-bottom:1px solid var(--lin);background:var(--cre2);letter-spacing:.05em;
+ text-transform:uppercase}
+.bloco .fd{padding:15px 20px 0;font-size:13.5px;color:var(--tx2);line-height:1.6}
+.bloco .big{padding:4px 14px 14px}
+.bloco table{margin-top:4px}
+.sh2{color:var(--tx3);font-size:12.5px;text-align:right}
+.mi{font-style:normal;color:var(--tx3);font-size:11.5px;display:inline-block;margin-top:2px}
 footer{margin-top:46px;padding-top:20px;border-top:1px solid var(--lin);font-size:12.5px;color:var(--tx2)}
 .rodmarca{display:flex;align-items:center;gap:13px;margin-bottom:14px}
 .rodmarca img{height:44px;width:auto}
@@ -225,6 +242,9 @@ footer p{margin-bottom:9px;line-height:1.6}
     <div class="cx"><h3>Trajetória do território</h3><div id="traj"></div></div>
   </div>
 
+  <div class="bloco" id="dem"></div>
+  <div class="bloco" id="curva"></div>
+
   <div class="nota" id="leitura"></div>
   <div class="nota" style="margin-top:14px"><b>Como ler.</b> O raio de 1 km mostra a disputa da
   esquina; o de 5 km, a bacia de captação. Uma escola pode ter 20% do próprio quarteirão e 3% da
@@ -287,6 +307,7 @@ footer p{margin-bottom:9px;line-height:1.6}
     <div><label>Alunos no mês</label><input type="number" inputmode="numeric" min="0" id="t2" placeholder="0"></div>
   </div>
   <div class="big" id="tkr"></div>
+  <div class="av" id="tkav" style="display:none"></div>
   <div class="nota"><b>Use a receita recebida</b>, não a faturada, se quiser o ticket real.
   A diferença entre as duas é a inadimplência, e ela não aparece no boleto emitido.</div>
 </section>
@@ -424,6 +445,154 @@ function pegaRaio(){
 }
 
 /* ---------- market share ---------- */
+/* ---------- a demanda que mora no raio ----------
+   Censo 2022, agregados por setor censitario, na mesma grade dos mapas: 116.697
+   celulas com gente, 6 km² cada. O arquivo tem 3 MB e fica fora do index.html -
+   e buscado na primeira vez que alguem pede, e o service worker guarda.
+
+   Uma celula raramente cai inteira dentro do circulo. Em vez de contar ou nao
+   contar pelo centro, cada celula entra pela fatia de area que o circulo cobre:
+   a celula vira um circulo de mesma area e se calcula a interseccao dos dois.
+   No raio de 5 km a diferenca e pequena; no de 1 km e ela que separa um numero
+   util de um numero errado.                                                   */
+var DEM=null, DEMFALHOU=false, demPedido=false;
+function pedeDemanda(){
+  if(DEM||demPedido||DEMFALHOU) return;
+  demPedido=true;
+  fetch("demanda.json").then(function(r){ return r.ok?r.json():null })
+    .then(function(j){ if(j) DEM=preparaDem(j); else DEMFALHOU=true; pintaDemanda() })
+    .catch(function(){ DEMFALHOU=true; demPedido=false; pintaDemanda() });
+}
+function preparaDem(j){
+  var d=j.d, n=d.length, q=0, r=0, i, L;
+  var la=new Float64Array(n), lo=new Float64Array(n);
+  var a=[new Int32Array(n),new Int32Array(n),new Int32Array(n),new Int32Array(n)];
+  var resp=new Int32Array(n), rmed=new Int32Array(n);
+  var S3=Math.sqrt(3);
+  for(i=0;i<n;i++){
+    L=d[i]; q+=L[0]; r+=L[1];                 /* o arquivo vem em delta */
+    /* axial -> km, a volta exata da conta que montou a grade */
+    var x=j.s*(S3*q + S3/2*r), y=j.s*(1.5*r);
+    la[i]=j.lat0+y/j.kmlat; lo[i]=j.lon0+x/j.kmlon;
+    a[0][i]=L[2]; a[1][i]=L[3]; a[2][i]=L[4]; a[3][i]=L[5];
+    resp[i]=L[6]; rmed[i]=L[7];
+  }
+  return {n:n,la:la,lo:lo,a:a,resp:resp,rmed:rmed,rcel:j.rcel,fonte:j.fonte};
+}
+/* area da interseccao de dois circulos - a "lente" */
+function lente(R,r,d){
+  if(d>=R+r) return 0;
+  var m=Math.min(R,r);
+  if(d<=Math.abs(R-r)) return Math.PI*m*m;
+  var R2=R*R, r2=r*r, d2=d*d;
+  var a1=Math.acos((d2+R2-r2)/(2*d*R)), a2=Math.acos((d2+r2-R2)/(2*d*r));
+  return R2*(a1-Math.sin(2*a1)/2) + r2*(a2-Math.sin(2*a2)/2);
+}
+function demNoRaio(){
+  if(!DEM||!pt) return null;
+  var R=raio, rc=DEM.rcel, acel=Math.PI*rc*rc;
+  var gl=(R+rc)/110.574, go=(R+rc)/(111.320*Math.cos(pt[0]*Math.PI/180));
+  var o={a:[0,0,0,0], resp:0, rendaSoma:0, celulas:0};
+  for(var i=0;i<DEM.n;i++){
+    if(Math.abs(DEM.la[i]-pt[0])>gl || Math.abs(DEM.lo[i]-pt[1])>go) continue;
+    var d=km(pt[0],pt[1],DEM.la[i],DEM.lo[i]);
+    var w=lente(R,rc,d)/acel;
+    if(w<=0) continue;
+    for(var k=0;k<4;k++) o.a[k]+=DEM.a[k][i]*w;
+    o.resp+=DEM.resp[i]*w;
+    o.rendaSoma+=DEM.rmed[i]*DEM.resp[i]*w;
+    o.celulas++;
+  }
+  o.renda = o.resp>0 ? o.rendaSoma/o.resp : 0;
+  for(k=0;k<4;k++) o.a[k]=Math.round(o.a[k]);
+  o.resp=Math.round(o.resp);
+  return o;
+}
+
+/* o que a aba de market share guardou da ultima conta, para os blocos de
+   demanda se redesenharem sozinhos quando o arquivo terminar de chegar      */
+var ULT=null;
+function pintaDemanda(){
+  var bx=$("dem"), bc=$("curva");
+  if(!ULT||!pt){ bx.innerHTML=""; bc.innerHTML=""; return }
+  if(DEMFALHOU){
+    bx.innerHTML='<div class="ft">A demanda do território</div><div class="notaf">'+
+      (location.protocol==="file:"
+        ? 'A população do Censo fica num arquivo à parte, e o navegador não deixa uma página '+
+          'aberta direto do disco buscar outro arquivo. Abra pelo endereço do site e ela aparece.'
+        : 'Os dados de população do Censo não carregaram — eles ficam num arquivo à parte, de '+
+          '3 MB, e precisam de internet na primeira vez. O restante da página não depende deles.')+
+      '</div>'; bc.innerHTML=""; return }
+  if(!DEM){
+    bx.innerHTML='<div class="ft">A demanda do território</div>'+
+      '<div class="notaf">Buscando a população do Censo 2022 no raio…</div>';
+    bc.innerHTML=""; return }
+  var o=demNoRaio(); if(!o){ bx.innerHTML=""; bc.innerHTML=""; return }
+  var fund=ULT.mer[1]+ULT.mer[2];        /* anos iniciais + finais, no raio */
+  var pop514=o.a[1]+o.a[2];
+  /* Oferta instalada contra demanda residente - NAO e taxa de privatizacao.
+     O numerador e matricula de escola que fica aqui; o denominador e crianca
+     que mora aqui. Sao conjuntos diferentes: a escola do centro enche com
+     aluno de longe. Chamar isso de "% das criancas na rede particular" seria
+     mentira, e no centro do Recife daria 66%, que ninguem acredita.         */
+  var por100 = pop514>0 ? fund/pop514*100 : 0;
+  var d59c = o.a[1]>0 ? (o.a[0]-o.a[1])/o.a[1]*100 : 0;
+
+  var h='<div class="ft">A demanda do território</div>'+
+    '<p class="fd">Quantas crianças moram dentro do raio, segundo o Censo 2022 — não quantas '+
+    'estudam. É o tamanho do mercado possível, contra o mercado que já existe.</p>'+
+    '<table><tr><th>Moram no raio</th><th>Pessoas</th><th>Equivale a</th></tr>'+
+    '<tr><td>0 a 4 anos</td><td>'+nf(o.a[0])+'</td><td class="sh2">educação infantil</td></tr>'+
+    '<tr><td>5 a 9 anos</td><td>'+nf(o.a[1])+'</td><td class="sh2">anos iniciais</td></tr>'+
+    '<tr><td>10 a 14 anos</td><td>'+nf(o.a[2])+'</td><td class="sh2">anos finais</td></tr>'+
+    '<tr><td>15 a 19 anos</td><td>'+nf(o.a[3])+'</td><td class="sh2">ensino médio</td></tr>'+
+    '<tr class="t"><td>Renda mediana do responsável</td><td colspan="2"><b>'+
+      (o.renda>0?rf(o.renda):'—')+'</b> por mês</td></tr></table>';
+  h+='<div class="big">'+
+     cx2(por100>=100?"vd":"",pf(por100,0),'matrículas particulares de 5 a 14 anos para cada 100 crianças morando no raio')+
+     cx2(d59c>=0?"vd":"vm",sinal(d59c),'a próxima turma de anos iniciais, contra a de hoje')+'</div>';
+  h+='<div class="notaf"><b>O que o primeiro número é, e o que ele não é.</b> Ele compara a '+
+     'matrícula de anos iniciais e finais das escolas <i>instaladas</i> no raio ('+nf(fund)+') '+
+     'com as crianças de 5 a 14 anos que <i>moram</i> nele ('+nf(pop514)+'). Não é a fatia das '+
+     'crianças daqui que estuda na rede particular: a escola do raio recebe aluno de longe, e a '+
+     'criança do raio pode estudar longe — o Censo não cruza as duas coisas, e eu não vou fingir '+
+     'que cruza. Acima de 100 o território tem mais vaga particular do que criança morando nele, '+
+     'sinal de que puxa aluno de fora; abaixo, a oferta instalada é menor que a demanda que vive '+
+     'aqui. Só anos iniciais e finais entram, porque é onde idade escolar e faixa do Censo quase '+
+     'coincidem — o médio termina aos 17 e a faixa do Censo vai até 19.'+
+     (raio<2?' <b>Neste raio de '+pf(raio,0)+' km, leia como ordem de grandeza:</b> a célula do '+
+      'Censo tem 6 km², maior que o próprio círculo.':'')+'</div>';
+  bx.innerHTML=h;
+
+  /* ---- a curva: o que já está decidido ---- */
+  /* Cada etapa é alimentada pela faixa logo atrás: em cinco anos, quem tem
+     0-4 hoje estará em idade de anos iniciais. A educação infantil não entra
+     na tabela porque quem vai enchê-la daqui a cinco anos ainda não nasceu -
+     e isso é previsão, não contagem.                                        */
+  var pares=[['Anos iniciais','quem entra no 1º ano em 5 anos',0],
+             ['Anos finais','quem chega ao 6º ano em 5 anos',1],
+             ['Ensino médio','quem chega ao médio em 5 anos',2]];
+  var c='<div class="ft">O que já está decidido</div>'+
+    '<p class="fd">A criança que vai encher a sala daqui a cinco anos já nasceu e já mora aqui. '+
+    'Comparando a faixa de hoje com a que vem atrás dela, dá para ver o tamanho da turma que '+
+    'está chegando — sem projeção nenhuma, só contando quem já existe.</p>'+
+    '<table><tr><th>Etapa</th><th>Mora hoje</th><th>Vem atrás</th><th>Variação</th></tr>';
+  for(var p=0;p<pares.length;p++){
+    var hoje=o.a[pares[p][2]+1], vem=o.a[pares[p][2]];
+    var va = hoje>0 ? (vem-hoje)/hoje*100 : 0;
+    c+='<tr><td>'+pares[p][0]+'<br><i class="mi">'+pares[p][1]+'</i></td><td>'+nf(hoje)+
+       '</td><td>'+nf(vem)+'</td><td class="sh"><span style="color:'+
+       (va>=0?'var(--vd)':'var(--vm)')+'">'+sinal(va)+'</span></td></tr>';
+  }
+  c+='</table>';
+  var d59=o.a[1]>0?(o.a[0]-o.a[1])/o.a[1]*100:0;
+  c+='<div class="notaf">Leitura: daqui a cinco anos, a faixa de 5 a 9 anos deste raio será '+
+     '<b>'+sinal(d59)+'</b> em relação à de hoje — é o que a sua captação de anos iniciais vai '+
+     'encontrar pela frente. Vale para o território, não para a sua escola: ganhar participação '+
+     'muda o seu número, não o número de crianças.</div>';
+  bc.innerHTML=c;
+}
+
 function calcMS(){
   var q=[0,1,2,3].map(function(k){return Math.max(0,+($("q"+k).value||0))});
   var tot=q[0]+q[1]+q[2]+q[3];
@@ -433,7 +602,9 @@ function calcMS(){
     ? "Sua escola num raio de "+pf(raio,0)+" km do CEP"
     : "Informe o CEP para ver o território";
   if(!ok){ $("mst").innerHTML=""; $("cartoes").innerHTML=""; $("traj").innerHTML="";
-    $("leitura").innerHTML=""; $("msav").style.display="none"; desenha(); return }
+    $("leitura").innerHTML=""; $("msav").style.display="none"; $("mov").innerHTML="";
+    ULT=null; pintaDemanda(); desenha(); return }
+  pedeDemanda();
 
   var mer=[0,0,0,0], t22=0,t23=0,t24=0,t25=0, i,e,v,v24;
   /* classificacao de cada concorrente pelo proprio ritmo, 2024 para 2025.
@@ -536,6 +707,12 @@ function calcMS(){
       'mudou de tamanho, não movimento de mercado. A escola que não tinha matrícula em 2024 '+
       'não cresceu: ela chegou, e por isso tem faixa própria.</div>';
   $("mov").innerHTML=mv;
+
+  /* guarda o que os blocos de demanda precisam: eles se redesenham sozinhos
+     quando o arquivo do Censo terminar de chegar, que é depois disto.      */
+  ULT={mer:mer, tot:tot, merT:merT};
+  pintaDemanda();
+  if(typeof calcTk==="function") calcTk();   /* o ticket passa a ter renda do raio */
 
   /* onde ela e forte e onde e fraca, dentro do proprio territorio */
   var le='';
@@ -760,6 +937,26 @@ function calcTk(){
   $("tkr").innerHTML=cx2("az",rf(t),"ticket médio mensal")+
     cx2("",rf(t*12),"por aluno ao ano")+
     cx2("vd",rf(r*12),"receita anual no ritmo atual");
+  /* O ticket sozinho nao diz se cabe no bolso de quem mora perto. Com a renda
+     do responsavel no raio, ele vira diagnostico de endereco: mensalidade alta
+     num raio de renda baixa nao e problema de campanha, e de territorio.     */
+  var av=$("tkav"), o=(pt&&DEM&&ULT)?demNoRaio():null;
+  if(!o||!o.renda){ av.style.display="none"; return }
+  var p=t/o.renda*100;
+  var tom = p<=15 ? "vd" : (p<=25 ? "" : "vm");
+  var frase = p<=15
+    ? "cabe com folga na renda típica de quem mora no raio."
+    : (p<=25
+      ? "é um esforço real para a família mediana do raio, mas dentro do que esse mercado pratica."
+      : "está acima do que a renda mediana do raio sustenta: a sua matrícula provavelmente vem "+
+        "de fora do raio, ou de uma fatia estreita dele. Vale conferir de onde vem o aluno antes "+
+        "de gastar campanha aqui dentro.");
+  av.className="av "+tom;
+  av.style.display="";
+  av.innerHTML="<b>"+pf(p,1)+"% da renda mediana do responsável</b> no raio de "+pf(raio,0)+
+    " km, que é de "+rf(o.renda)+" por mês. Um ticket de "+rf(t)+" "+frase+
+    "<br><span class='mi'>Renda do responsável pelo domicílio, Censo 2022. A conta usa o raio "+
+    "escolhido na aba de market share.</span>";
 }
 ["o1","o2"].forEach(function(i){$(i).oninput=calcOc});
 ["c1","c2"].forEach(function(i){$(i).oninput=calcCh});
