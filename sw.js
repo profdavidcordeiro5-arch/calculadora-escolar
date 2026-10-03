@@ -2,7 +2,7 @@
    Rede primeiro, arquivo guardado depois. Assim a versao publicada chega assim
    que houver internet, e o app continua abrindo quando nao houver. A cada
    atualizacao troque o numero de C para limpar o que ficou para tras. */
-var C = "mercado-v3";
+var C = "mercado-v4";
 self.addEventListener("install", function(e){ self.skipWaiting() });
 self.addEventListener("activate", function(e){
   e.waitUntil(caches.keys().then(function(ks){
