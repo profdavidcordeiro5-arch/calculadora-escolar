@@ -459,15 +459,20 @@ function pegaRaio(){
    ano e portanto na data de referencia do Censo. A conversao tem que usar o SM
    do mesmo ano do rendimento: dividir renda de 2022 pelo minimo de hoje
    misturaria dois momentos e encolheria a faixa de todo mundo.              */
-var SM22=1212;
+var SM22=1212, SM26=1621;
+/* As mesmas seis faixas, as mesmas cores e o mesmo divisor do mapa de calor.
+   Metrica diferente entre as duas telas faria o numero "mudar" de uma para a
+   outra na frente da escola, sem ter mudado nada.                           */
+var SMFX=[1,2,3,4,5];
+var SMCOR=["#CBDFF8","#86B6EF","#3987E5","#256ABF","#184F95","#0A2B55"];
+var SMROT=["Até 1 SM","De 1 a 2 SM","De 2 a 3 SM","De 3 a 4 SM","De 4 a 5 SM","Mais de 5 SM"];
+function smClasse(v){ var s=v/SM22,i; for(i=0;i<SMFX.length;i++) if(s<=SMFX[i]) return i;
+  return SMFX.length; }
 function faixaSM(r){
-  var n=r/SM22;
-  if(n<=1)  return "Até 1 salário mínimo";
-  if(n<=2)  return "Entre 1 e 2 salários mínimos";
-  if(n<=3)  return "Entre 2 e 3 salários mínimos";
-  if(n<=5)  return "Entre 3 e 5 salários mínimos";
-  if(n<=10) return "Entre 5 e 10 salários mínimos";
-  return "Mais de 10 salários mínimos";
+  var i=smClasse(r);
+  return i===0 ? "Até 1 salário mínimo"
+       : i===SMFX.length ? "Mais de 5 salários mínimos"
+       : "Entre "+SMFX[i-1]+" e "+SMFX[i]+" salários mínimos";
 }
 /* O dado vem por estado, em dados/<uf>.json: 450.046 setores censitarios no
    Brasil pesam 14 MB juntos, peso demais para abrir na reuniao. A pagina le o
@@ -475,17 +480,25 @@ function faixaSM(r){
    quando o CEP esta perto de uma divisa. Cada arquivo fica guardado depois.  */
 var DEMUF={}, DEMIDX=null, DEMFALHOU=false, DEMCOD=0, idxPedido=false, carregando=0;
 
+/* Os arquivos de estado podem estar dentro de dados/ ou soltos na raiz, ao
+   lado do index.html - no GitHub, arrastar uma pasta ou os arquivos dela da no
+   mesmo visual mas em caminhos diferentes. A pagina tenta os dois e fica com o
+   que responder, em vez de exigir que o upload tenha sido de um jeito so.   */
+var DEMBASE=null, DEMLOCAIS=["dados/",""];
+function tentaIndice(i){
+  if(i>=DEMLOCAIS.length){ DEMFALHOU=true; DEMCOD=404; pintaDemanda(); return }
+  fetch(DEMLOCAIS[i]+"indice.json").then(function(r){ return r.ok?r.json():null })
+    .then(function(j){
+      if(j&&j.PE){ DEMBASE=DEMLOCAIS[i]; DEMIDX=j; pedeDemanda() }
+      else tentaIndice(i+1);
+    })
+    .catch(function(){ tentaIndice(i+1) });
+}
 function pedeDemanda(){
   if(!pt) return;
   if(!DEMIDX){
     if(idxPedido||DEMFALHOU) return;
-    idxPedido=true;
-    fetch("dados/indice.json").then(function(r){
-        if(!r.ok){ DEMCOD=r.status; return null }
-        return r.json();
-      })
-      .then(function(j){ if(j){ DEMIDX=j; pedeDemanda() } else { DEMFALHOU=true; pintaDemanda() } })
-      .catch(function(){ DEMFALHOU=true; DEMCOD=0; idxPedido=false; pintaDemanda() });
+    idxPedido=true; tentaIndice(0);
     return;
   }
   /* margem generosa: a UF vizinha entra quando a borda dela chega perto */
@@ -500,7 +513,7 @@ function pedeDemanda(){
 function carregaUF(uf){
   if(DEMUF[uf]!==undefined) return;
   DEMUF[uf]=null; carregando++;
-  fetch("dados/"+uf.toLowerCase()+".json").then(function(r){
+  fetch(DEMBASE+uf.toLowerCase()+".json").then(function(r){
       if(!r.ok){ DEMCOD=r.status; return null }
       return r.json();
     })
@@ -539,7 +552,7 @@ function lente(R,r,d){
 function demNoRaio(){
   if(!pt||!temDem()) return null;
   var R=raio;
-  var o={a:[0,0,0,0], resp:0, rendaSoma:0, celulas:0, faixas:[0,0,0,0], semInfo:0, exato1:0};
+  var o={a:[0,0,0,0], resp:0, rendaSoma:0, celulas:0, faixas:[0,0,0,0,0,0], semInfo:0, exato1:0};
   for(var uf in DEMUF){
     var D=DEMUF[uf]; if(!D) continue;
     for(var i=0;i<D.n;i++){
@@ -553,9 +566,7 @@ function demNoRaio(){
       o.resp+=D.resp[i]*w;
       o.rendaSoma+=D.rmed[i]*D.resp[i]*w;
       if(D.rmed[i]>0){
-        var sm=D.rmed[i]/SM22;
-        var b = sm<=1 ? 0 : (sm<=3 ? 1 : (sm<=5 ? 2 : 3));
-        o.faixas[b]+=D.resp[i]*w;
+        o.faixas[smClasse(D.rmed[i])]+=D.resp[i]*w;
         /* No Brasil o salario minimo nao e so um limite: e o valor que a maior
            parte dos responsaveis realmente recebe, e meia PE tem mediana
            exatamente nele. Sem separar isso, a primeira faixa parece miseria
@@ -566,7 +577,8 @@ function demNoRaio(){
     }
   }
   o.renda = o.resp>0 ? o.rendaSoma/o.resp : 0;
-  for(k=0;k<4;k++){ o.a[k]=Math.round(o.a[k]); o.faixas[k]=Math.round(o.faixas[k]) }
+  for(k=0;k<4;k++) o.a[k]=Math.round(o.a[k]);
+  for(k=0;k<o.faixas.length;k++) o.faixas[k]=Math.round(o.faixas[k]);
   o.resp=Math.round(o.resp); o.semInfo=Math.round(o.semInfo);
   o.exato1=Math.round(o.exato1);
   return o;
@@ -584,8 +596,8 @@ function pintaDemanda(){
         ? 'A população do Censo fica na pasta <b>dados/</b>, e o navegador não deixa uma página '+
           'aberta direto do disco buscar outro arquivo. Abra pelo endereço do site.'
         : DEMCOD===404
-        ? 'A pasta <b>dados/</b> não está publicada neste endereço. Ela tem um arquivo por '+
-          'estado e vai junto com o <b>index.html</b>. Suba a pasta inteira e recarregue.'
+        ? 'Não achei o <b>indice.json</b> nem em <b>dados/</b> nem ao lado do <b>index.html</b>. '+
+          'Ele vem junto com os 27 arquivos de estado; suba os 28 e recarregue.'
         : DEMCOD
         ? 'O servidor respondeu <b>'+DEMCOD+'</b> ao buscar a população do Censo.'
         : 'A população do Censo não carregou: ela precisa de internet na primeira vez em cada '+
@@ -623,17 +635,17 @@ function pintaDemanda(){
        'de 2022. Mediana, não média: é o rendimento da família do meio, que não sobe por causa '+
        'de poucas rendas muito altas no raio.</div>';
     /* ---- famílias por faixa de salário mínimo ---- */
-    var FX=[['Até 1 SM','#B8352B','até '+rf(SM22)],
-            ['De 1 a 3 SM','#C9A063',rf(SM22)+' a '+rf(3*SM22)],
-            ['De 3 a 5 SM','#22314E',rf(3*SM22)+' a '+rf(5*SM22)],
-            ['Mais de 5 SM','#1E7A43','acima de '+rf(5*SM22)]];
-    var somaF=o.faixas[0]+o.faixas[1]+o.faixas[2]+o.faixas[3];
+    var somaF=0, f;
+    for(f=0;f<o.faixas.length;f++) somaF+=o.faixas[f];
     if(somaF>0){
       h+='<table><tr><th>Famílias por faixa de renda</th><th>Responsáveis</th>'+
          '<th>Do raio</th></tr>';
-      for(var f=0;f<4;f++){
-        h+='<tr><td><i class="pt" style="background:'+FX[f][1]+'"></i>'+FX[f][0]+
-           '<br><i class="mi">'+FX[f][2]+'</i></td><td>'+nf(o.faixas[f])+'</td>'+
+      for(f=0;f<o.faixas.length;f++){
+        var de = f===0 ? 'até '+rf(SM22)
+               : f===SMFX.length ? 'acima de '+rf(SMFX[f-1]*SM22)
+               : rf(SMFX[f-1]*SM22)+' a '+rf(SMFX[f]*SM22);
+        h+='<tr><td><i class="pt" style="background:'+SMCOR[f]+'"></i>'+SMROT[f]+
+           '<br><i class="mi">'+de+'</i></td><td>'+nf(o.faixas[f])+'</td>'+
            '<td class="sh">'+pf(o.faixas[f]/somaF*100,1)+'%</td></tr>';
       }
       h+='<tr class="t"><td>Total com renda informada</td><td><b>'+nf(somaF)+'</b></td>'+
@@ -645,7 +657,8 @@ function pintaDemanda(){
            '<i>exatamente</i> um salário mínimo — '+pf(o.exato1/o.faixas[0]*100,0)+'% delas. '+
            'No Brasil o mínimo não é só um teto de faixa: é o valor que a maior parte dos '+
            'responsáveis de fato recebe. Essa faixa diz "a família típica daqui ganha um '+
-           'mínimo", e não que ela ganha menos do que isso.</div>';
+           'mínimo", e não que ela ganha menos do que isso. Hoje o salário mínimo é de '+
+           rf(SM26)+'; a conta usa o de 2022 porque o rendimento também é de 2022.</div>';
       }
       h+='<div class="notaf"><b>Leia "moram em áreas de", não "ganham".</b> O Censo não publica '+
          'faixa de renda por território — publica a renda mediana de cada área. Então cada '+
